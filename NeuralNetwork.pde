@@ -101,7 +101,8 @@ public class NeuralNetwork{
   
 
     
-  NeuralNetwork(int hS1, Connection[][] c1, Connection[][] c2){ // hiddenSchicht1
+    NeuralNetwork(int hS1, Connection[][] c1, Connection[][] c2){ // hiddenSchicht1
+    
     // Input Neuronen werden erstellt
     inputSchicht = new InputNeuron[iSLaenge];
     for(int i=0; i<iSLaenge; i++){
@@ -109,7 +110,7 @@ public class NeuralNetwork{
     }
     
     float w1;
-    // angegeben gewichtete connections werden erstellt
+    // random-gewichtete connections werden erstellt
     connections1 = new Connection[hS1][iSLaenge];
     for(int i=0; i<hS1; i++){
       for(int i2=0; i2<iSLaenge; i2++){
@@ -144,6 +145,10 @@ public class NeuralNetwork{
       outputSchicht[i] = new WorkingNeuron(connections2[i]);
     }    
   }
+  
+  
+  
+  
   
   
   //// getter

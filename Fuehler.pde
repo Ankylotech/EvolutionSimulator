@@ -4,7 +4,6 @@ class Fuehler{
   
   private int abstand = 15;
   private Lebewesen lw;
-
   
   Fuehler(Lebewesen l){
     position = new PVector(abstand,0);

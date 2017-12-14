@@ -151,8 +151,8 @@ public class Lebewesen{
   
   // Fressen
   public void fressen(float wille){
-    if(wille > 0.1){
-      //energie -= energieverbrauch*alter;
+    if(wille > 0.5){
+      energie -= energieverbrauch*alter;
       Feld feld = map.getFeld((int)position.x,(int)position.y);
       float neueFeldEnergie = feld.getEnergie() - fressrate;
       
