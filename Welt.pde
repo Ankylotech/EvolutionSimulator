@@ -8,7 +8,7 @@ public class Welt{
   private float jahr;
   private float spacing;
   private int fB;
-  private float zeitProFrame = 0.0005;
+  
   
   public Welt(int weltG, int lw){
     
@@ -87,8 +87,8 @@ public class Welt{
       lw.erinnern(lw.NN.getMemory());
       lw.fellfarbeAendern(lw.NN.getFellRot(), lw.NN.getFellGruen(), lw.NN.getFellBlau());
       
-      lw.fuehlerRotieren1(lw.NN.getRotationFuehler1());
-      lw.fuehlerRotieren2(lw.NN.getRotationFuehler2());
+      lw.fuehlerRotieren1(lw.NN.getRotationFuehler1() + degrees(lw.NN.getRotation()));
+      lw.fuehlerRotieren2(lw.NN.getRotationFuehler2() + degrees(lw.NN.getRotation()));
     }
     
     todUndGeburt();

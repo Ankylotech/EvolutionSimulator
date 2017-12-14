@@ -8,7 +8,7 @@ public class Lebewesen{
   
   private float mutationsrate = 0.1;
   private float durchmesser = 10; // muss an Welt skaliert werden
-  private float fressrate = 60;
+  private float fressrate = 20;
   private float maxGeschwindigkeit = 1; //GEN
   private float energie = 300.0;
   private float maxEnergie = 1400.0; 
@@ -173,7 +173,7 @@ public class Lebewesen{
   
   // Gebaeren
   public void gebaeren(float wille){
-    if(wille > 0.5 && energie >= geburtsenergie && (alter % reproduktionsWartezeit >= 0.0 && alter % reproduktionsWartezeit <0.0005) && alter > 0.1){
+    if(wille > 0.5 && energie >= geburtsenergie && (alter % reproduktionsWartezeit >= 0.0 && alter % reproduktionsWartezeit <zeitProFrame) && alter > 0.1){
       energie -= geburtsenergie;
       map.addLebewesen(new Lebewesen((int)position.x, (int)position.y, NN.getConnections1(), NN.getConnections2()));
       println("Ein neues Früchtchen ist entsprungen!");

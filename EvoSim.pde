@@ -9,6 +9,7 @@ private float xOffsetGesamt = 0.0;
 private float yOffsetGesamt = 0.0;
 private float xPressed, yPressed;
 private boolean locked = false;
+private float zeitProFrame = 0.0005;
 
 Welt map = new Welt(200, 50);
 
