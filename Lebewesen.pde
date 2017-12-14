@@ -1,19 +1,26 @@
 
 public class Lebewesen{
   
+  public final static int maxRotationswinkel = 10;
+  
   private PVector geschwindigkeit;
   private PVector position;
   
+  private float mutationsrate = 0.1;
   private float durchmesser = 10; // muss an Welt skaliert werden
-  private float fressrate = 20;
-  private float maxGeschwindigkeit = 4; //GEN
-  private float energie = 1400.0;
+  private float fressrate = 60;
+  private float maxGeschwindigkeit = 1; //GEN
+  private float energie = 300.0;
   private float maxEnergie = 1400.0; 
-  private color fellFarbe;
+  private color fellFarbe = color((int)random(0,256), (int)random(0,256), (int)random(0,256));
   private float verbrauchBewegung = 7;
   private float wasserreibung = 0.02;
   private float energieverbrauch = 3;
   private boolean lebend = true;
+  private float geburtsenergie = 200;
+  private float reproduktionsWartezeit = 0.2;
+  
+  private float alter = 0;
   
   private Fuehler fuehler1;
   private Fuehler fuehler2;
@@ -26,24 +33,32 @@ public class Lebewesen{
     
     NN = new NeuralNetwork(7);
     
-    fellFarbe = color((int)random(0,256), (int)random(0,256), (int)random(0,256));
     geschwindigkeit = new PVector(maxGeschwindigkeit,maxGeschwindigkeit);
     geschwindigkeit.limit(maxGeschwindigkeit);
     
     position = new PVector(x,y);
-
+    
+    fuehler1 = new Fuehler(this);
+    fuehler2 = new Fuehler(this);
+    
   }
   
-  // 2. Konstruktor, damit die Farbe bei den Nachkommen berücksichtigt werden kann
-  Lebewesen(int x, int y, color c){
-    NN = new NeuralNetwork(3,5);
-    fellFarbe = c;
+  // 2. Konstruktor, damit die Farbe bei den Nachkommen berücksichtigt werden kann und die Gewichte übergeben werden können // Mutationen noch nicht implementiert
+  Lebewesen(int x, int y, Connection[][] c1, Connection[][] c2){
+    
+    energie = geburtsenergie;
+    c1 = mutieren(c1);
+    c2 = mutieren(c2);
+    
+    NN = new NeuralNetwork(7, c1, c2);
     
     geschwindigkeit = new PVector(maxGeschwindigkeit,maxGeschwindigkeit);
     geschwindigkeit.limit(maxGeschwindigkeit);
     
     position = new PVector(x,y);
-
+    
+    fuehler1 = new Fuehler(this);
+    fuehler2 = new Fuehler(this);
   }
   
   public void drawLebewesen(){
@@ -71,6 +86,31 @@ public class Lebewesen{
     NN.getInputNBias().setWert(1);
     // Richtung
     NN.getInputNRichtung().setWert(map(degrees(geschwindigkeit.heading()), 0, 360, -1, 1));
+    
+    
+    //// Fuehler 1
+    // Richtung Fuehler 
+    NN.getInputNFuehlerRichtung1().setWert(map(degrees(fuehler1.position.heading()), 0, 360, -1, 1));
+    // Gegnerenergie
+    //float[] gegnerEnergie1 = fuehler1.getFuehlerGegnerEnergie();
+    NN.getInputNFuehlerGegnerEnergie1().setWert(map(fuehler1.getFuehlerGegnerEnergie(), 0, 1400, -1, 1));
+    // Feldenergie
+    //float[] feldEnergie1 = fuehler1.getFuehlerFeldEnergie();
+    NN.getInputNFuehlerFeldEnergie1().setWert(map(fuehler1.getFuehlerFeldEnergie(), 0, 80, -1, 1));
+    // Feldart
+    NN.getInputNFuehlerFeldArt1().setWert(map(fuehler1.getFuehlerFeldArt(), 0, 1, -1, 1));
+    
+    //// Fuehler 2
+    // Richtung Fuehler
+    NN.getInputNFuehlerRichtung2().setWert(map(degrees(fuehler2.position.heading()), 0, 360, -1, 1));
+    // Gegnerenergie
+    //float[] gegnerEnergie2 = fuehler2.getFuehlerGegnerEnergie();
+    NN.getInputNFuehlerGegnerEnergie2().setWert(map(fuehler2.getFuehlerGegnerEnergie(), 0, 1400, -1, 1));
+    // Feldenergie
+    //float[] feldEnergie2 = fuehler2.getFuehlerFeldEnergie();
+    NN.getInputNFuehlerFeldEnergie2().setWert(map(fuehler2.getFuehlerFeldEnergie(), 0, 80, -1, 1));
+    // Feldart
+    NN.getInputNFuehlerFeldArt2().setWert(map(fuehler2.getFuehlerFeldArt(), 0, 1, -1, 1));
   }
   
   // Bewewgung
@@ -103,24 +143,67 @@ public class Lebewesen{
       
     }
   }
+  
+  // Grundverbrauch
+  public void leben(){
+    energie -= energieverbrauch*alter;
+  }
+  
   // Fressen
-  public void fressen(){
-    energie -= energieverbrauch;
-    Feld feld = map.getFeld((int)position.x,(int)position.y);
-    float neueFeldEnergie = feld.getEnergie() - fressrate;
-    
-    if (neueFeldEnergie>=0){ // Feld hat genug Energie
-      energie += fressrate;
-      feld.setEnergie((int)neueFeldEnergie);
-    } else { // Feld hat zu wenig Energie
-      energie += feld.getEnergie();
-      feld.setEnergie(0);
+  public void fressen(float wille){
+    if(wille > 0.1){
+      //energie -= energieverbrauch*alter;
+      Feld feld = map.getFeld((int)position.x,(int)position.y);
+      float neueFeldEnergie = feld.getEnergie() - fressrate;
+      
+      if (neueFeldEnergie>=0){ // Feld hat genug Energie
+        energie += fressrate;
+        feld.setEnergie((int)neueFeldEnergie);
+      } else { // Feld hat zu wenig Energie
+        energie += feld.getEnergie();
+        feld.setEnergie(0);
+      }
+      
+      if (energie>maxEnergie){ // Lebewesen-Energie ist über dem Maximum
+        feld.setEnergie((int)(feld.getEnergie()+(energie-maxEnergie)));
+        energie = maxEnergie;
+      }
+    }
+  }
+  
+  // Gebaeren
+  public void gebaeren(float wille){
+    if(wille > 0.5 && energie >= geburtsenergie && (alter % reproduktionsWartezeit >= 0.0 && alter % reproduktionsWartezeit <0.0005) && alter > 0.1){
+      energie -= geburtsenergie;
+      map.addLebewesen(new Lebewesen((int)position.x, (int)position.y, NN.getConnections1(), NN.getConnections2()));
+      println("Ein neues Früchtchen ist entsprungen!");
     }
     
-    if (energie>maxEnergie){ // Lebewesen-Energie ist über dem Maximum
-      feld.setEnergie((int)(feld.getEnergie()+(energie-maxEnergie)));
-      energie = maxEnergie;
+  }
+  
+  // Fuehler 1 rotieren
+  public void fuehlerRotieren1(float angle){
+    fuehler1.position.rotate(radians(angle));
+  }
+  public void fuehlerRotieren2(float angle){
+    fuehler2.position.rotate(radians(angle));
+  }
+  
+  // mutiert Gewichte
+  public Connection[][] mutieren(Connection[][] cArr){
+    for(int x=0; x<cArr.length; x++){
+      for(Connection c : cArr[x]){
+        float chance = random(0,1);
+        if(chance>0.5){
+          c.setWeight(c.getWeight()+random(-mutationsrate,mutationsrate));
+        }
+      }
     }
+    return cArr;
+  }
+  
+  public void altern(){
+    alter += map.getZeitProFrame();
   }
   
   public void erinnern(float m){
@@ -133,10 +216,18 @@ public class Lebewesen{
   
   // getter 
   public boolean getStatus(){
-    if(energie<0)lebend = false;
+    if(energie<0){
+      lebend = false;
+    }
     return lebend;
   }
   public float getMaxGeschwindigkeit(){
     return maxGeschwindigkeit;
+  }
+  public float getEnergie(){
+    return energie;
+  }
+  public float getMaxEnergie(){
+    return maxEnergie;
   }
 }
