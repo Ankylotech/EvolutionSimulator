@@ -46,7 +46,7 @@ class Feld{
   }
   
   public void drawFeld(){
-    if(nHoehe>meeresspiegel){
+    if(this.isLand()){
       fill(map(energiewert, 0, maxEnergiewert, 255, 80), map(energiewert, 0, maxEnergiewert, 210, 140), 20); //muss noch geändert werden
     } else fill(0, 0, map(nHoehe, 0, 45, 0, 140));
     rect(posX, posY, feldBreite, feldBreite);
