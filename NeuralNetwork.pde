@@ -6,52 +6,10 @@ public class NeuralNetwork{
   private Connection[][] connections2;
   private WorkingNeuron[] outputSchicht;
   
-  // wird für aller erste Generation verwendet, gewichte sind random zwischen 0.01 und 
-  NeuralNetwork(int iS, int hS1){ // inputSchicht, hiddenSchicht1
-    // Input Neuronen werden erstellt
-    inputSchicht = new InputNeuron[iS];
-    for(int i=0; i<iS; i++){
-      inputSchicht[i] = new InputNeuron();
-    }
-    
-    // random-gewichtete connection werden erstellt
-    connections1 = new Connection[hS1][iS];
-    for(int i=0; i<hS1; i++){
-      for(int i2=0; i2<iS; i2++){
-        connections1[i][i2] = new Connection(inputSchicht[i2], random(0,1));
-      }
-    }
-    
-    // Hidden Neuronen (1 Schicht) werden erstellt
-    hiddenSchicht1 = new WorkingNeuron[hS1];
-    for(int i=0; i<hS1; i++){
-      hiddenSchicht1[i] = new WorkingNeuron(connections1[i]);
-    }
-    
-    float w2;
-    // random-gewichtete connection wird erstellt // outputNeuronen werden manuell spezifiziert
-    int outputNeuronen = 7; // Grund in NN_Planung.txt ersichtlich
-    connections2 = new Connection[outputNeuronen][hS1];
-    for(int i=0; i<outputNeuronen; i++){
-      for(int i2=0; i2<hS1; i2++){
-        w2 = randomGaussian();
-        connections2[i][i2] = new Connection(hiddenSchicht1[i2], w2);
-      }
-    }
-    // Output Neuronen werden erstellt
-    outputSchicht = new WorkingNeuron[outputNeuronen];
-    for(int i=0; i<outputNeuronen; i++){
-      outputSchicht[i] = new WorkingNeuron(connections2[i]);
-    }
-  }
-    
-    
-    
-    
-    
-    private int iSLaenge = 17; // Grund in NN_Planung.txt ersichtlich
-    
-    NeuralNetwork(int hS1){ // hiddenSchicht1
+  private int iSLaenge = 18;
+  private int outputNeuronen = 12;
+      
+  NeuralNetwork(int hS1){ // hiddenSchicht1
     
     // Input Neuronen werden erstellt
     inputSchicht = new InputNeuron[iSLaenge];
@@ -75,12 +33,6 @@ public class NeuralNetwork{
       hiddenSchicht1[i] = new WorkingNeuron(connections1[i]);
     }
     
-    // random-gewichtete connection wird erstellt // outputNeuronen werden manuell spezifiziert
-    
-    
-    int outputNeuronen = 10; // Grund in NN_Planung.txt ersichtlich
-    
-    
     float w2;
     connections2 = new Connection[outputNeuronen][hS1];
     for(int i=0; i<outputNeuronen; i++){
@@ -96,12 +48,9 @@ public class NeuralNetwork{
     }    
   }
   
-  
-  
-  
 
     
-    NeuralNetwork(int hS1, Connection[][] c1, Connection[][] c2){ // hiddenSchicht1
+  NeuralNetwork(int hS1, Connection[][] c1, Connection[][] c2){ // hiddenSchicht1
     
     // Input Neuronen werden erstellt
     inputSchicht = new InputNeuron[iSLaenge];
@@ -126,11 +75,6 @@ public class NeuralNetwork{
     }
     
     // random-gewichtete connection wird erstellt // outputNeuronen werden manuell spezifiziert
-    
-    
-    int outputNeuronen = 10; // Grund in NN_Planung.txt ersichtlich
-    
-    
     float w2;
     connections2 = new Connection[outputNeuronen][hS1];
     for(int i=0; i<outputNeuronen; i++){
@@ -139,6 +83,7 @@ public class NeuralNetwork{
         connections2[i][i2] = new Connection(hiddenSchicht1[i2],w2);
       }
     }
+    
     // Output Neuronen werden erstellt
     outputSchicht = new WorkingNeuron[outputNeuronen];
     for(int i=0; i<outputNeuronen; i++){
@@ -148,29 +93,21 @@ public class NeuralNetwork{
   
   
   
-  
-  
-  
   //// getter
   // InputNeuronen, setzt voraus dass so viele Neuronen generiert wurden, wie es hier Werte gibt
   public InputNeuron getInputNGeschwindigkeit(){
-    
     return inputSchicht[0];
   }
   public InputNeuron getInputNFellRot(){
-   
     return inputSchicht[1];
   }
   public InputNeuron getInputNFellGruen(){
-
     return inputSchicht[2];
   }
   public InputNeuron getInputNFellBlau(){
-  
     return inputSchicht[3];
   }
   public InputNeuron getInputNEnergie(){
-    
     return inputSchicht[4];
   }
   public InputNeuron getInputNFeldart(){
@@ -185,36 +122,41 @@ public class NeuralNetwork{
   public InputNeuron getInputNRichtung(){
     return inputSchicht[8];
   }
+  public InputNeuron getInputNStresslevel(){
+    return inputSchicht[9];
+  }
   ////Fuehler
   
   // 1. Fuehler
   public InputNeuron getInputNFuehlerRichtung1(){
-    return inputSchicht[9];
-  }
-  public InputNeuron getInputNFuehlerGegnerEnergie1(){
     return inputSchicht[10];
   }
-  public InputNeuron getInputNFuehlerFeldEnergie1(){
+  public InputNeuron getInputNFuehlerGegnerEnergie1(){
     return inputSchicht[11];
   }
-  public InputNeuron getInputNFuehlerFeldArt1(){
+  public InputNeuron getInputNFuehlerFeldEnergie1(){
     return inputSchicht[12];
+  }
+  public InputNeuron getInputNFuehlerFeldArt1(){
+    return inputSchicht[13];
   }
   
   // 2. Fuehler
   
-    public InputNeuron getInputNFuehlerRichtung2(){
-    return inputSchicht[13];
-  }
-  public InputNeuron getInputNFuehlerGegnerEnergie2(){
+  public InputNeuron getInputNFuehlerRichtung2(){
     return inputSchicht[14];
   }
-  public InputNeuron getInputNFuehlerFeldEnergie2(){
+  public InputNeuron getInputNFuehlerGegnerEnergie2(){
     return inputSchicht[15];
   }
-  public InputNeuron getInputNFuehlerFeldArt2(){
+  public InputNeuron getInputNFuehlerFeldEnergie2(){
     return inputSchicht[16];
   }
+  public InputNeuron getInputNFuehlerFeldArt2(){
+    return inputSchicht[17];
+  }
+  
+
   
   
   // OutputNeuronen
@@ -252,6 +194,14 @@ public class NeuralNetwork{
   public float getGeburtwille(){
     return outputSchicht[9].getWert();
   }
+  public float getAngriffswille(){
+    return outputSchicht[10].getWert();
+  } 
+  public float getStresslevelaenderung(){
+    return  map(outputSchicht[11].getWert(),0,1,-1,1)*Lebewesen.maxStresslevelaenderungswert;
+  }
+  
+  
   
   // andere getter
   public Connection[][] getConnections1(){

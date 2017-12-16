@@ -52,6 +52,10 @@ class Feld{
     rect(posX, posY, feldBreite, feldBreite);
   }
   
+  public void addEnergie(float e){
+    energiewert += e;
+  }
+  
   // getter(bisher)
   public float getEnergie(){
     return energiewert;

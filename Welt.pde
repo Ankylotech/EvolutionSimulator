@@ -89,6 +89,7 @@ public class Welt{
       
       lw.fuehlerRotieren1(lw.NN.getRotationFuehler1() + degrees(lw.NN.getRotation()));
       lw.fuehlerRotieren2(lw.NN.getRotationFuehler2() + degrees(lw.NN.getRotation()));
+      lw.angriff(lw.NN.getAngriffswille());
     }
     
     todUndGeburt();
@@ -129,9 +130,12 @@ public class Welt{
     }
   }
   public void showLebewesen(){
+    stroke(1);
+    strokeWeight(0.1);
     for(Lebewesen lw : bewohner){
       lw.drawLebewesen();
     }
+    noStroke();
   }
   // zeichnet ein Array aus Lebewesen (meistens am Anfang genutzt) // ka ob mans noch braucht, ich lass es einfach mal drinnen
   public void showLebewesen(Lebewesen[] lwArray){
@@ -181,7 +185,7 @@ public class Welt{
   
   public Lebewesen getTier(int x,int y){
     for(Lebewesen a:bewohner){
-      if(a.position.x - x > -a.durchmesser/4 && a.position.x - x < a.durchmesser/4 && a.position.y - y > -a.durchmesser/4 && a.position.y - y < -a.durchmesser/4){
+      if(sqrt(sq(a.position.x- x) + sq(a.position.y- y)) < a.durchmesser/2){
         return a;
       }
     }

@@ -2,6 +2,7 @@
 public class Lebewesen{
   
   public final static int maxRotationswinkel = 10;
+  public final static float maxStresslevelaenderungswert = 10;
   
   private PVector geschwindigkeit;
   private PVector position;
@@ -18,7 +19,11 @@ public class Lebewesen{
   private float energieverbrauch = 3;
   private boolean lebend = true;
   private float geburtsenergie = 200;
-  private float reproduktionsWartezeit = 0.2;
+  private float reproduktionsWartezeit = 0.5;
+  private int angriffswert = 20;
+  private float maxStresslevel = 100; 
+  private float stresslevel = 0;
+
   
   private float alter = 0;
   
@@ -31,7 +36,7 @@ public class Lebewesen{
   // sollte bei 1. Generation verwendet werden
   Lebewesen(int x, int y){
     
-    NN = new NeuralNetwork(7);
+    NN = new NeuralNetwork(15);
     
     geschwindigkeit = new PVector(maxGeschwindigkeit,maxGeschwindigkeit);
     geschwindigkeit.limit(maxGeschwindigkeit);
@@ -44,13 +49,14 @@ public class Lebewesen{
   }
   
   // 2. Konstruktor, damit die Farbe bei den Nachkommen berücksichtigt werden kann und die Gewichte übergeben werden können // Mutationen noch nicht implementiert
-  Lebewesen(int x, int y, Connection[][] c1, Connection[][] c2){
+  Lebewesen(int x, int y, Connection[][] c1, Connection[][] c2){  
     
     energie = geburtsenergie;
     c1 = mutieren(c1);
     c2 = mutieren(c2);
+   
     
-    NN = new NeuralNetwork(7, c1, c2);
+    NN = new NeuralNetwork(15, c1, c2);
     
     geschwindigkeit = new PVector(maxGeschwindigkeit,maxGeschwindigkeit);
     geschwindigkeit.limit(maxGeschwindigkeit);
@@ -86,6 +92,8 @@ public class Lebewesen{
     NN.getInputNBias().setWert(1);
     // Richtung
     NN.getInputNRichtung().setWert(map(degrees(geschwindigkeit.heading()), 0, 360, -1, 1));
+    //Stress
+    // NN.getInputNStresslevel().setWert(map(stresslevel,0,maxStresslevel,-1,1));
     
     
     //// Fuehler 1
@@ -111,6 +119,8 @@ public class Lebewesen{
     NN.getInputNFuehlerFeldEnergie2().setWert(map(fuehler2.getFuehlerFeldEnergie(), 0, 80, -1, 1));
     // Feldart
     NN.getInputNFuehlerFeldArt2().setWert(map(fuehler2.getFuehlerFeldArt(), 0, 1, -1, 1));
+
+
   }
   
   // Bewewgung
@@ -140,13 +150,18 @@ public class Lebewesen{
       if (position.y < 0){ // wenn zu weit oben
         position.set(position.x, fensterGroesse+position.y); // + position.y, weil es immer ein negativer Wert ist
       }
-      
     }
   }
   
   // Grundverbrauch
   public void leben(){
     energie -= energieverbrauch*alter;
+    stresslevel += NN.getStresslevelaenderung();
+    if (stresslevel > maxStresslevel){
+      stresslevel = maxStresslevel;
+    } else if(stresslevel < 0){
+      stresslevel = 0;
+    }
   }
   
   // Fressen
@@ -154,18 +169,18 @@ public class Lebewesen{
     if(wille > 0.5){
       energie -= energieverbrauch*alter;
       Feld feld = map.getFeld((int)position.x,(int)position.y);
-      float neueFeldEnergie = feld.getEnergie() - fressrate;
+      float feldEnergie = feld.getEnergie();
+      feld.addEnergie(-fressrate);
       
-      if (neueFeldEnergie>=0){ // Feld hat genug Energie
+      if (feld.getEnergie()>=0){ // Feld hat genug Energie
         energie += fressrate;
-        feld.setEnergie((int)neueFeldEnergie);
       } else { // Feld hat zu wenig Energie
-        energie += feld.getEnergie();
+        energie += feldEnergie;
         feld.setEnergie(0);
       }
       
       if (energie>maxEnergie){ // Lebewesen-Energie ist über dem Maximum
-        feld.setEnergie((int)(feld.getEnergie()+(energie-maxEnergie)));
+        feld.setEnergie((int)(feldEnergie+(energie-maxEnergie)));
         energie = maxEnergie;
       }
     }
@@ -202,6 +217,29 @@ public class Lebewesen{
     return cArr;
   }
   
+  public void angriff(float wille){
+    if (wille>0.5){
+      energie -= energieverbrauch;
+      PVector opferPosition = position;
+      opferPosition.setMag(position.mag()+durchmesser);
+      
+      Lebewesen opfer = map.getTier((int)(opferPosition.x),(int)(opferPosition.y)); 
+      if(!(opfer == null)){
+        if(opfer.getEnergie() >= angriffswert){
+          energie += angriffswert;
+          opfer.addEnergie(-angriffswert);
+        }else{
+          energie += opfer.getEnergie();
+          opfer.addEnergie(-angriffswert);
+        }
+        if (energie>maxEnergie){ // Lebewesen-Energie ist über dem Maximum
+          opfer.addEnergie((energie-maxEnergie));
+          energie = maxEnergie;
+        }
+      }  
+    }
+  }
+  
   public void altern(){
     alter += map.getZeitProFrame();
   }
@@ -212,6 +250,9 @@ public class Lebewesen{
   
   public void fellfarbeAendern(float r, float g, float b){
     fellFarbe = color(r,g,b);
+  }
+  public void addEnergie(float e){
+    energie += e;
   }
   
   // getter 
@@ -229,5 +270,8 @@ public class Lebewesen{
   }
   public float getMaxEnergie(){
     return maxEnergie;
+  }
+  public PVector getPosition(){
+    return position;
   }
 }

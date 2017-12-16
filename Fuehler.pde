@@ -33,11 +33,13 @@ class Fuehler{
     }
     
     // Falls Fuehler auf anderer Seite der Map sind, werden die Linien nicht mehr gemalt
-    if(position.mag() - lw.position.mag() == abstand){
+    if(!(position.dist(lw.getPosition()) > abstand)){
       line(position.x, position.y, lw.position.x, lw.position.y);
     }
-    
+    stroke(1);
+    strokeWeight(0.1);
     ellipse(position.x, position.y, lw.durchmesser/2, lw.durchmesser/2);
+    noStroke();
   }
   
   ////getter
