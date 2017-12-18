@@ -9,9 +9,8 @@ private float xOffsetGesamt = 0.0;
 private float yOffsetGesamt = 0.0;
 private float xPressed, yPressed;
 private boolean locked = false;
-private float zeitProFrame = 0.0005;
 
-Welt map = new Welt(100, 100);
+public Welt map = new Welt(200, 100);
 
 void setup(){
   size(1000,1000);
@@ -24,7 +23,6 @@ void setup(){
 
 void draw(){
   map.update();
-  delay(100);
 }
 
 // Eventhandler
