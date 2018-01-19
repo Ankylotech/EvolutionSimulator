@@ -6,8 +6,8 @@ public class NeuralNetwork{
   private Connection[][] connections2;
   private WorkingNeuron[] outputSchicht;
     
-  private int iSLaenge = 18; // Grund in NN_Planung.txt ersichtlich
-  private int outputNeuronen = 12; // Grund in NN_Planung.txt ersichtlich
+  private int iSLaenge = 17; // Grund in NN_Planung.txt ersichtlich
+  private int outputNeuronen = 11; // Grund in NN_Planung.txt ersichtlich
     
   NeuralNetwork(int hS1){ // hiddenSchicht1
     
@@ -152,9 +152,6 @@ public class NeuralNetwork{
   public InputNeuron getInputNFuehlerFeldArt2(){
     return inputSchicht[16];
   }
-  public InputNeuron getInputNStresslevel(){
-    return inputSchicht[17];
-  }
   
   
   // OutputNeuronen
@@ -162,7 +159,7 @@ public class NeuralNetwork{
     return outputSchicht[0].getWert() * lw.getMaxGeschwindigkeit();
   }
   public float getRotation(){
-    return outputSchicht[1].getWert() * Lebewesen.maxRotationswinkelBewegung; // muss noch sehen, wie die Rotation wirklich laeuft
+    return (map(outputSchicht[1].getWert(),0,1, -1,1) * Lebewesen.maxRotationswinkelBewegung/2); // muss noch sehen, wie die Rotation wirklich laeuft
   }
   public float getMemory(){
     return outputSchicht[2].getWert();
@@ -195,9 +192,6 @@ public class NeuralNetwork{
   
   public float getAngriffswille(){
     return outputSchicht[10].getWert();
-  }
-  public float getStresslevelaenderung(){
-    return outputSchicht[11].getWert();
   }
   
   

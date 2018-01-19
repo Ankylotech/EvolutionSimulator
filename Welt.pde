@@ -87,14 +87,13 @@ public class Welt{
       lw.input();
       lw.leben();
       lw.altern();
-      lw.bewegen(lw.NN.getGeschwindigkeit(lw), degrees(lw.NN.getRotation()));
+      lw.bewegen(lw.NN.getGeschwindigkeit(lw),lw.NN.getRotation());
       lw.fressen(lw.NN.getFresswille());
       lw.erinnern(lw.NN.getMemory());
       lw.fellfarbeAendern(lw.NN.getFellRot(), lw.NN.getFellGruen(), lw.NN.getFellBlau());
-      lw.fuehlerRotieren1(lw.NN.getRotationFuehler1());
-      lw.fuehlerRotieren2(lw.NN.getRotationFuehler2());
+      lw.fuehlerRotieren1(lw.NN.getRotationFuehler1()+lw.NN.getRotation());
+      lw.fuehlerRotieren2(lw.NN.getRotationFuehler2()+lw.NN.getRotation());
       lw.angriff(lw.NN.getAngriffswille());
-      lw.stressen(lw.NN.getStresslevelaenderung());
     }
     
     todUndGeburt();
