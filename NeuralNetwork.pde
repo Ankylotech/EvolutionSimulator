@@ -6,7 +6,7 @@ public class NeuralNetwork{
   private Connection[][] connections2;
   private WorkingNeuron[] outputSchicht;
     
-  private int iSLaenge = 17; // Grund in NN_Planung.txt ersichtlich
+  private int iSLaenge = 14; // Grund in NN_Planung.txt ersichtlich
   private int outputNeuronen = 11; // Grund in NN_Planung.txt ersichtlich
     
   NeuralNetwork(int hS1){ // hiddenSchicht1
@@ -24,8 +24,12 @@ public class NeuralNetwork{
       for(int i2=0; i2<iSLaenge; i2++){
         w1 = random(-1/sqrt(iSLaenge), 1/sqrt(iSLaenge)); // TEST, vorher randomGaussian()
         connections1[i][i2] = new Connection(inputSchicht[i2], w1);
+        if(i2 > 5){
+          connections1[i][i2] = new Connection(inputSchicht[i2], 0);
+        }
       }
     }
+    
     
     // Hidden Neuronen (1 Schicht) werden erstellt
     hiddenSchicht1 = new WorkingNeuron[hS1];
@@ -94,72 +98,65 @@ public class NeuralNetwork{
     
     return inputSchicht[0];
   }
-  public InputNeuron getInputNFellRot(){
-   
-    return inputSchicht[1];
-  }
-  public InputNeuron getInputNFellGruen(){
-
-    return inputSchicht[2];
-  }
-  public InputNeuron getInputNFellBlau(){
-  
-    return inputSchicht[3];
-  }
   public InputNeuron getInputNEnergie(){
     
-    return inputSchicht[4];
+    return inputSchicht[1];
   }
   public InputNeuron getInputNFeldart(){
-    return inputSchicht[5];
+    return inputSchicht[2];
   }
   public InputNeuron getInputNMemory(){
-    return inputSchicht[6];
+    return inputSchicht[3];
   }
   public InputNeuron getInputNBias(){
-    return inputSchicht[7];
+    return inputSchicht[4];
   }
   public InputNeuron getInputNRichtung(){
-    return inputSchicht[8];
+    return inputSchicht[5];
   }
   ////Fuehler
   
   // 1. Fuehler
   public InputNeuron getInputNFuehlerRichtung1(){
-    return inputSchicht[9];
+    return inputSchicht[6];
   }
   public InputNeuron getInputNFuehlerGegnerEnergie1(){
-    return inputSchicht[10];
+    return inputSchicht[7];
   }
   public InputNeuron getInputNFuehlerFeldEnergie1(){
-    return inputSchicht[11];
+    return inputSchicht[8];
   }
   public InputNeuron getInputNFuehlerFeldArt1(){
-    return inputSchicht[12];
+    return inputSchicht[9];
   }
   
   // 2. Fuehler
   
     public InputNeuron getInputNFuehlerRichtung2(){
-    return inputSchicht[13];
+    return inputSchicht[10];
   }
   public InputNeuron getInputNFuehlerGegnerEnergie2(){
-    return inputSchicht[14];
+    return inputSchicht[11];
   }
   public InputNeuron getInputNFuehlerFeldEnergie2(){
-    return inputSchicht[15];
+    return inputSchicht[12];
   }
   public InputNeuron getInputNFuehlerFeldArt2(){
-    return inputSchicht[16];
+    return inputSchicht[13];
   }
   
   
   // OutputNeuronen
-  public float getGeschwindigkeit(Lebewesen lw){
-    return outputSchicht[0].getWert() * lw.getMaxGeschwindigkeit();
+  public float getGeschwindigkeit(Lebewesen lw){ 
+    float returnValue = map(outputSchicht[0].getWert(),-1,1,0,1) * lw.getMaxGeschwindigkeit();
+
+    return returnValue;
   }
   public float getRotation(){
-    return (map(outputSchicht[1].getWert(),0,1, -1,1) * Lebewesen.maxRotationswinkelBewegung/2); // muss noch sehen, wie die Rotation wirklich laeuft
+    float returnValue = (outputSchicht[1].getWert() * Lebewesen.maxRotationswinkelBewegung/2);
+    
+    println(returnValue);
+    return returnValue; // muss noch sehen, wie die Rotation wirklich laeuft
   }
   public float getMemory(){
     return outputSchicht[2].getWert();
@@ -176,22 +173,22 @@ public class NeuralNetwork{
   
   // Fuehler
   public float getRotationFuehler1(){
-    return map(outputSchicht[6].getWert(), 0, 1, -Lebewesen.maxRotationswinkelFuehler/2, Lebewesen.maxRotationswinkelFuehler/2);
+    return map(outputSchicht[6].getWert(), -1, 1, -Lebewesen.maxRotationswinkelFuehler/2, Lebewesen.maxRotationswinkelFuehler/2);
   }
   public float getRotationFuehler2(){
-    return map(outputSchicht[7].getWert(), 0, 1, -Lebewesen.maxRotationswinkelFuehler/2, Lebewesen.maxRotationswinkelFuehler/2);
+    return map(outputSchicht[7].getWert(), -1, 1, -Lebewesen.maxRotationswinkelFuehler/2, Lebewesen.maxRotationswinkelFuehler/2);
   }
   
   
   public float getFresswille(){
-    return outputSchicht[8].getWert();
+    return map(outputSchicht[8].getWert(),-1,1,0,1);
   }
   public float getGeburtwille(){
-    return outputSchicht[9].getWert();
+    return map(outputSchicht[9].getWert(),-1,1,0,1);
   }
   
   public float getAngriffswille(){
-    return outputSchicht[10].getWert();
+    return map(outputSchicht[10].getWert(),-1,1,0,1);
   }
   
   

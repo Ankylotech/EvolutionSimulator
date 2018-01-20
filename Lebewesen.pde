@@ -12,7 +12,7 @@ public class Lebewesen{
   private float fressrate;//GEN
   private float maxGeschwindigkeit; //GEN
   private float energie = 300.0;
-  private float maxEnergie = 1400;//GEN
+  private float maxEnergie = 1400;
   private color fellFarbe = color((int)random(0,256), (int)random(0,256), (int)random(0,256));
   private float verbrauchBewegung = maxEnergie/200;
   private float wasserreibung = 0.1;
@@ -28,7 +28,7 @@ public class Lebewesen{
   private Fuehler fuehler2;
   
   private NeuralNetwork NN;
-  private float memory = 1; // GEN
+  private float memory = 1; 
   
   // sollte bei 1. Generation verwendet werden
   Lebewesen(int x, int y){
@@ -88,10 +88,6 @@ public class Lebewesen{
     // Geschwindigkeit
     NN.getInputNGeschwindigkeit().setWert(map(geschwindigkeit.mag(), 0, maxGeschwindigkeit, -1, 1));
     // Fellfarbe
-    NN.getInputNFellRot().setWert(map(red(fellFarbe), 0, 255, -1, 1));
-    NN.getInputNFellGruen().setWert(map(green(fellFarbe), 0, 255, -1, 1));
-    NN.getInputNFellBlau().setWert(map(blue(fellFarbe), 0, 255, -1, 1));
-    // eigene Energie
     NN.getInputNEnergie().setWert(map(energie, 0, maxEnergie, -1, 1));
     // Feldart
     //println("\n\ngetInputNFeldArt");

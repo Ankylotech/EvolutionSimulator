@@ -10,7 +10,7 @@ private float yOffsetGesamt = 0.0;
 private float xPressed, yPressed;
 private boolean locked = false;
 
-public Welt map = new Welt(200, 100);
+public Welt map = new Welt(200, 1);
 
 void setup(){
   size(1000,1000);
