@@ -6,7 +6,7 @@ public class NeuralNetwork{
   private Connection[][] connections2;
   private WorkingNeuron[] outputSchicht;
     
-  private int iSLaenge = 14; // Grund in NN_Planung.txt ersichtlich
+  private int iSLaenge = 17; // Grund in NN_Planung.txt ersichtlich
   private int outputNeuronen = 11; // Grund in NN_Planung.txt ersichtlich
     
   NeuralNetwork(int hS1){ // hiddenSchicht1
@@ -24,9 +24,9 @@ public class NeuralNetwork{
       for(int i2=0; i2<iSLaenge; i2++){
         w1 = random(-1/sqrt(iSLaenge), 1/sqrt(iSLaenge)); // TEST, vorher randomGaussian()
         connections1[i][i2] = new Connection(inputSchicht[i2], w1);
-        if(i2 > 5){
+        /*if(i2 > 5){
           connections1[i][i2] = new Connection(inputSchicht[i2], 0);
-        }
+        }*/
       }
     }
     
@@ -145,6 +145,16 @@ public class NeuralNetwork{
     return inputSchicht[13];
   }
   
+  public InputNeuron getInputNFeldHoehe(){
+    return inputSchicht[14];
+  }
+  public InputNeuron getInputNFuehlerFeldHoehe1(){
+    return inputSchicht[15];
+  }
+  public InputNeuron getInputNFuehlerFeldHoehe2(){
+    return inputSchicht[16];
+  }
+  
   
   // OutputNeuronen
   public float getGeschwindigkeit(Lebewesen lw){ 
@@ -154,8 +164,7 @@ public class NeuralNetwork{
   }
   public float getRotation(){
     float returnValue = (outputSchicht[1].getWert() * Lebewesen.maxRotationswinkelBewegung/2);
-    
-    println(returnValue);
+
     return returnValue; // muss noch sehen, wie die Rotation wirklich laeuft
   }
   public float getMemory(){

@@ -88,6 +88,8 @@ public class Lebewesen{
     // Geschwindigkeit
     NN.getInputNGeschwindigkeit().setWert(map(geschwindigkeit.mag(), 0, maxGeschwindigkeit, -1, 1));
     // Fellfarbe
+
+    // eigene Energie
     NN.getInputNEnergie().setWert(map(energie, 0, maxEnergie, -1, 1));
     // Feldart
     //println("\n\ngetInputNFeldArt");
@@ -99,6 +101,7 @@ public class Lebewesen{
     // Richtung
     NN.getInputNRichtung().setWert(map(degrees(geschwindigkeit.heading()), -180, 180, -1, 1));
     
+    NN.getInputNFeldHoehe().setWert(map(map.getFeld((int)position.x, (int)position.y).nHoehe,0,100,-1,1));
     
     //// Fuehler 1
     // Richtung Fuehler 
@@ -112,6 +115,8 @@ public class Lebewesen{
     // Feldart
     NN.getInputNFuehlerFeldArt1().setWert(map(fuehler1.getFuehlerFeldArt(), 0, 1, -1, 1));
     
+    NN.getInputNFuehlerFeldHoehe1().setWert(map(fuehler1.getFuehlerFeldHoehe(),0,100,-1,1));
+    
     //// Fuehler 2
     // Richtung Fuehler
     NN.getInputNFuehlerRichtung2().setWert(map(fuehler2.getRichtung(), -180, 180, -1, 1)); //                                                                  Hier könnte es Probleme mit map geben
@@ -123,6 +128,8 @@ public class Lebewesen{
     NN.getInputNFuehlerFeldEnergie2().setWert(map(fuehler2.getFuehlerFeldEnergie(), 0, Feld.maxEnergiewertAllgemein, -1, 1));
     // Feldart
     NN.getInputNFuehlerFeldArt2().setWert(map(fuehler2.getFuehlerFeldArt(), 0, 1, -1, 1));
+    
+    NN.getInputNFuehlerFeldHoehe2().setWert(map(fuehler2.getFuehlerFeldHoehe(),0,100,-1,1));
   }
   
   // Bewewgung

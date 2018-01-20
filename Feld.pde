@@ -18,7 +18,7 @@ class Feld{
     feldBreite = fB;
     
     if(this.isLand()){
-      regenerationsrate = 0.4;
+      regenerationsrate = 10000/((nHoehe*nHoehe)*10);
       energiewert = 0;
       maxEnergiewert = maxEnergiewertAllgemein;
     } else {
@@ -49,7 +49,7 @@ class Feld{
   
   public void drawFeld(){
     if(nHoehe>meeresspiegel){
-      fill(map(energiewert, 0, maxEnergiewert, 255, 80), map(energiewert, 0, maxEnergiewert, 210, 140), 20); //muss noch geändert werden
+      fill(map(energiewert, 0, maxEnergiewert, 255, 80)  - map(nHoehe, 45, 100, 90, 0), map(energiewert, 0, maxEnergiewert, 210, 140) - map(nHoehe, 45, 100, -45, 45), 20 - map(nHoehe, 45, 100, 0, 20)); //muss noch geändert werden
     } else fill(0, 0, map(nHoehe, 0, 45, 0, 140));
     rect(posX, posY, feldBreite, feldBreite);
   }
