@@ -156,14 +156,15 @@ public class Welt{
     jahr += zeitProFrame;
     float neuesJahr = (float)(jahr * multiplikator);
     jahr = (double)floor(neuesJahr) / multiplikator;
-    if(jahr%1 == 0){
+    if((jahr*100)%1 == 0){
       double aeltestesLw = 0;
       for(Lebewesen lw : bewohner){
         if(lw.getAlter() > aeltestesLw) aeltestesLw = lw.getAlter();
       }
-      println("Momentan ältestes Lebewsen: " + aeltestesLw);
-      println("Durschnitsalter aller Lebewesen" + gesamtAlter/bewohner.size());
-
+      output1.print("(" + jahr + "," + aeltestesLw + ");");
+      output1.flush();
+      output2.print("(" + jahr + "," + gesamtAlter/bewohner.size() + ");");
+      output2.flush();
     }
     
     showWelt();
