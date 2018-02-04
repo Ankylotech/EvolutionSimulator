@@ -27,12 +27,4 @@ with open("C:\\Users\\Anky\Desktop\\Programmieren\\Processing\\EvoSim\\durchschn
     plt.show()
 x = []
 y = []
-with open("C:\\Users\\Anky\Desktop\\Programmieren\\Processing\\EvoSim\\staerkeLw%s.txt"% myIndex) as ältestes:
-    data = ältestes.read().split(";")
-    data.pop(-1)
-    for i in data:
-        x.append(make_tuple(i)[0])
-        y.append(make_tuple(i)[1])
-    plt.plot(x,y)
-    plt.show()
 
