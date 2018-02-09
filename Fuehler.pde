@@ -1,6 +1,6 @@
 class Fuehler{
   
-  private int abstand = 15;
+  private float abstand;
   
   private PVector position;
   private PVector ausrichtung;
@@ -8,9 +8,10 @@ class Fuehler{
   private Lebewesen lw;
   
   Fuehler(Lebewesen l){
+    lw = l;
+    abstand = lw.getDurchmesser()*1.25;
     ausrichtung = new PVector(abstand,0);
     position = new PVector(0,0);
-    lw = l;
   }
   
   //updated und malt den Fühler
@@ -18,6 +19,7 @@ class Fuehler{
     
     // Fühlerposition wird erstellt
     position.set(lw.position.x, lw.position.y); //                               lw.position.copy() wurder manchmal null, keine Ahnung wieso
+    ausrichtung.setMag(lw.getDurchmesser() + lw.energie/200);
     position.add(ausrichtung);
     
     // Fuehler werden auf die gegenüberliegende Seite teleportiert, wenn sie außerhalb der Map sind
@@ -39,7 +41,7 @@ class Fuehler{
       line(position.x, position.y, lw.position.x, lw.position.y);
     }
     
-    ellipse(position.x, position.y, lw.durchmesser/2, lw.durchmesser/2);
+    ellipse(position.x, position.y, lw.getDurchmesser()/4, lw.getDurchmesser()/4);
   }
   
   public void fuehlerRotieren(float angle){
@@ -67,6 +69,8 @@ class Fuehler{
   public float getRichtung(){
     return degrees(ausrichtung.heading());
   }
-  
+  public float getFuehlerFeldArt(){
+    return map.getFeld((int)position.x, (int)position.y).isLandInt();
+  }
   
 }

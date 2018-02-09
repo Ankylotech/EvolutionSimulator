@@ -7,19 +7,57 @@ public class Welt{
   private float weltY;
   private double jahr;
   private float spacing;
-  private int fB;
+  private float fB;
   private double zeitProFrame = 0.0005;
   private int multiplikator = 10000;
+  private float gesamtFitness = 0;
+  private float gesamtAlter = 0;
+  private int geburtenProJahr;
+  private int todeProJahr;
+  private int geburten = 0;
+  Plot fitness;
+  Plot altersschnitt;
+  Plot aeltestes;
+  Button bFitness;
+  Button bAltersschnitt;
+  Button bAeltestes;
+  Button keiner;
+  
+  String graph = "keiner";
+  
+  
+  
+  // Tiere: Standard Werte
+  final public static float stdFressrate = 20;
+  final public static float stdMaxGeschwindigkeit = 2;
+  final public static float stdAngriffswert = 20;
+  final public static float stdReproduktionswartezeit = 0.25;
+  float stdDurchmesser;
+  
   
   public Welt(int weltG, int lw){
     
     jahr = 0;
     lwZahl = lw;
-    
     weltGroesse = weltG;
+    //plots
+    fitness = new Plot(0,250,200,200);
+    altersschnitt = new Plot(0,250,200,200);
+    aeltestes = new Plot(0,250,200,200);
+    fitness.addValues(0,0);
+    altersschnitt.addValues(0,0);
+    aeltestes.addValues(0,0);
+    
+    //Buttons Interface: x:200, y: 250
+    bFitness = new Button(0,50,100,50,"DurchschnittsFitness");
+    bAltersschnitt = new Button(100,50,100,50,"DurchschnittsAlter");
+    bAeltestes = new Button(0,100,100,50,"AeltestesAlter");
+    keiner = new Button(100,100,100,50,"kein Graph");
+    
     
     // skaliert die Feldbreite and die Fenstergroesse und die Feldanzahl pro Reihe
-    fB = (int)(fensterGroesse/weltGroesse);
+    fB = fensterGroesse/weltGroesse;
+    stdDurchmesser = fB * 1.5;
     
     // generiert Welt
     welt = new Feld[weltGroesse][weltGroesse];
@@ -43,8 +81,8 @@ public class Welt{
         posY = (int)random(0,fensterGroesse);
       } while (!this.getFeld(posX,posY).isLand());
       
-      bewohner.add(new Lebewesen(posX,posY));
-      
+      bewohner.add(new Lebewesen(posX,posY, fB, currentID));
+      currentID++;
     }
   }
   
@@ -54,6 +92,7 @@ public class Welt{
     for(Lebewesen lw : bewohnerCopy){
       if(!lw.getStatus()){
         bewohner.remove(bewohner.indexOf(lw));
+        todeProJahr++;
       }
     }
     
@@ -66,6 +105,16 @@ public class Welt{
         }
       }
     }
+    
+    if(bewohner.size() > lwZahl*2){
+      Lebewesen schw = bewohner.get(0);
+      for(int i = 0;i<lwZahl;i++){
+        if(bewohner.get(i).calculateFitnessStandard()<schw.calculateFitnessStandard()){
+          schw = bewohner.get(i);
+        }
+      }
+      bewohner.remove(bewohner.indexOf(schw));
+    }
   }
   
   public float entfernungLebewesen(Lebewesen lw1, Lebewesen lw2){
@@ -74,8 +123,15 @@ public class Welt{
   }
   
   public void gebaeren(Lebewesen lw1, Lebewesen lw2){
-    /*                              Beide LW muessen zustimmen                                                                Beide LW muessen genug Energie haben                                Beide LW muessen geburtsbereit sein*/
-    if((lw1.NN.getGeburtwille() > Lebewesen.reproduktionswille && lw2.NN.getGeburtwille() > Lebewesen.reproduktionswille) && (lw1.getEnergie() >= Lebewesen.geburtsenergie && lw2.getEnergie() >= Lebewesen.geburtsenergie) && (lw1.isGeburtsbereit() && lw2.isGeburtsbereit())){
+    if((lw1.NN.getGeburtwille()*lw1.calculateFitnessStandard() > Lebewesen.reproduktionswille && lw2.NN.getGeburtwille()*lw2.calculateFitnessStandard() > Lebewesen.reproduktionswille) //Beide LW muessen zustimmen
+      &&
+      (lw1.getEnergie() >= Lebewesen.geburtsenergie && lw2.getEnergie() >= Lebewesen.geburtsenergie) // Beide LW muessen genug Energie haben
+      &&
+      (lw1.isGeburtsbereit() && lw2.isGeburtsbereit()) // Beide LW muessen geburtsbereit sein
+      //&&
+      //(lw1.calculateFitnessStandard() > this.getDurchschnittsFitness() && lw2.calculateFitnessStandard() > this.getDurchschnittsFitness()) // funktioniert nur bei Standardfitness
+      )
+      {
       // benötigte Geburtsenergie wird abgezogen
       lw1.addEnergie(-Lebewesen.geburtsenergie);
       lw2.addEnergie(-Lebewesen.geburtsenergie);
@@ -83,7 +139,8 @@ public class Welt{
       // Dummy-Vectoren
       PVector posLw1 = new PVector(lw1.getPosition().x, lw1.getPosition().y);
       PVector posLw2 = new PVector(lw2.getPosition().x, lw2.getPosition().y);
-      
+      geburten++;
+      println("geburt" + geburten);
       // Neues Lebewesen mit gemischten Connections entsteht
       this.addLebewesen(
       new Lebewesen((int)(posLw1.x + cos(PVector.angleBetween(posLw1,
@@ -104,11 +161,15 @@ public class Welt{
                     lw2.getFressrate(),
                     lw2.getMaxGeschwindigkeit(),
                     lw2.getReproduktionswartezeit(),
-                    lw2.getAngriffswert()
+                    lw2.getAngriffswert(),
+                    
+                    currentID
                     ));
-      println("Ein neues Früchtchen ist entsprungen!");
+      currentID++;
       lw1.setLetzteGeburt((float)lw1.getAlter());
       lw2.setLetzteGeburt((float)lw2.getAlter());
+      
+      geburtenProJahr++;
     }
   }
   
@@ -131,11 +192,14 @@ public class Welt{
           posY = (int)random(0,fensterGroesse);
         } while (!this.getFeld(posX,posY).isLand());
         
-        bewohner.add(new Lebewesen(posX,posY));
+        bewohner.add(new Lebewesen(posX, posY, fB, currentID));
+        currentID++;
       }
     }
     
-    float gesamtAlter = 0;
+    gesamtAlter = 0;
+    gesamtFitness = 0;
+    
     for(Lebewesen lw : bewohner){
       lw.input();
       lw.leben();
@@ -147,29 +211,56 @@ public class Welt{
       lw.fuehlerRotieren1(lw.NN.getRotationFuehler1());
       lw.fuehlerRotieren2(lw.NN.getRotationFuehler2());
       lw.angriff(lw.NN.getAngriffswille()); // hilft, Bevoelkerung nicht zu gross zu halten
+      
       gesamtAlter += lw.getAlter();
+      gesamtFitness += lw.calculateFitnessStandard(); // funktioniert nur bei Standardfitness
+      
     }
     
     todUndGeburt();
+    
     felderBewachsen();
+    
+   
     
     jahr += zeitProFrame;
     float neuesJahr = (float)(jahr * multiplikator);
     jahr = (double)floor(neuesJahr) / multiplikator;
-    if((jahr*100)%1 == 0){
-      double aeltestesLw = 0;
-      for(Lebewesen lw : bewohner){
-        if(lw.getAlter() > aeltestesLw) aeltestesLw = lw.getAlter();
+    if(save){
+      if((jahr*100)%1 == 0){
+        double aeltestesLwAlter = 0;
+        int aeltestesLwID = 0; // 0 ist Dummywert
+        for(Lebewesen lw : bewohner){
+          if(lw.getAlter() > aeltestesLwAlter){
+            aeltestesLwAlter = lw.getAlter();
+            aeltestesLwID = lw.getID();
+          }
+        }
+        fitness.addValues((float)jahr,(float)gesamtFitness/bewohner.size());
+        aeltestes.addValues((float)jahr,(float)aeltestesLwAlter);
+        altersschnitt.addValues((float)jahr,(float)gesamtAlter/bewohner.size());
+        output1.print("(" + jahr + "," + aeltestesLwAlter + "," + aeltestesLwID + ");");
+        output1.flush();
+        output2.print("(" + jahr + "," + gesamtAlter/bewohner.size() + ");");
+        output2.flush();
+        output3.print("(" + jahr + "," + gesamtFitness/bewohner.size() + ");");
+        output3.flush();
       }
-      output1.print("(" + jahr + "," + aeltestesLw + ");");
-      output1.flush();
-      output2.print("(" + jahr + "," + gesamtAlter/bewohner.size() + ");");
-      output2.flush();
+      if(jahr%1==0){
+        output4.print("(" + jahr + "," + todeProJahr + "," + geburtenProJahr + ");");
+        output4.flush();
+        geburtenProJahr = 0;
+        todeProJahr = 0;
+      }
     }
     
     showWelt();
     showLebewesen();
     showInterface();
+    if(graph == "fitness")fitness.show();
+    if(graph == "aeltestes")aeltestes.show();
+    if(graph == "schnitt")altersschnitt.show();
+    
   }
   // Lebewesen hinzufügen
   public void addLebewesen(Lebewesen lw){
@@ -178,6 +269,7 @@ public class Welt{
   
   // Interface
   public void showInterface(){
+
     String jahre = "Jahre: " + jahr;
     fill(50, 200);
     rect(weltX,weltY, 200/skalierungsfaktor, 250/skalierungsfaktor);
@@ -187,7 +279,13 @@ public class Welt{
     textAlign(LEFT);
     text(jahre, weltX + spacing, weltY + spacing);
     
-    text("Bewohner: " + bewohner.size(), weltX + spacing*2, weltY + spacing*2);
+    text("Bewohner: " + bewohner.size(), weltX + spacing, weltY + spacing*2);
+    
+    bFitness.show();
+    bAltersschnitt.show();
+    bAeltestes.show();
+    keiner.show();
+    
   }
   
   // zeichnet die Welt
@@ -284,4 +382,12 @@ public class Welt{
   public int getZeitMultiplikator(){
     return multiplikator;
   }
+  public float getFeldbreite(){
+    return fB;
+  }
+  public float getDurchschnittsFitness(){ // funktioniert nur bei Standardfitness
+    return gesamtFitness/bewohner.size();
+  }
+  
+  
 }

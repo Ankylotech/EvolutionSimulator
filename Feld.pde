@@ -5,8 +5,8 @@ class Feld {
   private float regenerationsrate;
   private float energiewert = 0;
   private float maxEnergiewert;
-  private int feldBreite;
-  private float maxRegenerationsrate = 0.4;
+  private float feldBreite;
+  private float maxRegenerationsrate = 1;
 
   private int arrayPosX;
   private int arrayPosY;
@@ -15,7 +15,7 @@ class Feld {
 
   private int meeresspiegel = 45;
 
-  Feld(int x, int y, float h, int fB, int aX, int aY) {
+  Feld(float x, float y, float h, float fB, int aX, int aY) {
     posX = x;
     posY = y;
     nHoehe = h;
@@ -24,7 +24,6 @@ class Feld {
     arrayPosY = aY;
 
     if (this.isLand()) {
-      maxRegenerationsrate = 1;
       maxEnergiewert = maxEnergiewertAllgemein;
     } else {
       maxRegenerationsrate = 0;
@@ -80,6 +79,8 @@ class Feld {
         bewachsen.remove(feldToRemove);
       }
     }
+    regenerationsrate *= meeresspiegel+20/nHoehe;
+    if(regenerationsrate>maxRegenerationsrate)regenerationsrate = maxRegenerationsrate;
     energiewert += regenerationsrate;
     if (energiewert > maxEnergiewert){
     energiewert = maxEnergiewert;
@@ -90,6 +91,11 @@ class Feld {
     if (nHoehe>meeresspiegel) {
       return true;
     } else return false;
+  }
+  public int isLandInt(){
+    if (nHoehe>meeresspiegel){
+      return 1;
+    } else return 0;
   }
 
   public void drawFeld() {
