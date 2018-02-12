@@ -29,7 +29,7 @@ class Button {
     fill(0, 100);
     rect(posX, posY, bWidth, bHeight);
     fill(255);
-    textSize(10);
+    textSize(10/skalierungsfaktor);
     text(name, posX, posY+bHeight/2);
     noStroke();
   }
