@@ -1,5 +1,8 @@
 import java.util.Scanner;
 
+
+
+
 PrintWriter output1;
 PrintWriter output2;
 PrintWriter output3;

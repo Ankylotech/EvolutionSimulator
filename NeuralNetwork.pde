@@ -23,7 +23,7 @@ public class NeuralNetwork{
     connections1 = new Connection[hS1][iSLaenge];
     for(int i=0; i<hS1; i++){
       for(int i2=0; i2<iSLaenge; i2++){
-        w1 = randomGaussian(); // sollte vielleicht verändert werden
+        w1 = random(-1/sqrt(iSLaenge),1/sqrt(iSLaenge)); // sollte vielleicht verändert werden
         connections1[i][i2] = new Connection(inputSchicht[i2], w1);
       }
     }
@@ -38,7 +38,7 @@ public class NeuralNetwork{
     connections2 = new Connection[outputNeuronen][hS1];
     for(int i=0; i<outputNeuronen; i++){
       for(int i2=0; i2<hS1; i2++){
-        w2 = randomGaussian(); // sollte vielleicht verändert werden
+        w2 = random(-1/sqrt(hS1),1/sqrt(hS1)); // sollte vielleicht verändert werden
         connections2[i][i2] = new Connection(hiddenSchicht1[i2],w2);
       }
     }
