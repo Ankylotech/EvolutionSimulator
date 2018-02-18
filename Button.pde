@@ -39,10 +39,13 @@ class Button {
     posX = map.weltX + X/skalierungsfaktor;
     posY = map.weltY + Y/skalierungsfaktor;
 
+    float rMouseX = mouseX-(xOffsetGesamt*skalierungsfaktor);
+    float rMouseY = mouseY-(yOffsetGesamt*skalierungsfaktor);
+
     bWidth = (W)/skalierungsfaktor;
     bHeight = (H)/skalierungsfaktor;
 
-    if (mousePressed && mouseX>posX && mouseX<posX+bWidth && mouseY > posY && mouseY < posY+bHeight) {
+    if (rMouseX>posX && rMouseX<posX+bWidth && rMouseY > posY && rMouseY < posY+bHeight) {
       return true;
     } else return false;
   }

@@ -7,16 +7,15 @@ class Matrix {
     rows = r;
     cols = c;
     m = new float[r][c];
+    
   }
 
-  Matrix mult(Matrix m2) {
-    Matrix returnMatrix = new Matrix(rows,m2.cols);
-    for (int x = 0; x < rows; x++) {
-      for (int y = 0;y < m2.cols ; y++) {
-        returnMatrix.set(x,y,mult(getRow(x),m2.getCol(y)));
+  void mult(Matrix m1,Matrix m2) {
+    for (int x = 0; x < m2.rows; x++) {
+      for (int y = 0; y < m1.cols; y++) {
+        set(x, y, mult(m2.getRow(x), m1.getCol(y)));
       }
     }
-    return returnMatrix;
   }
   float mult(float[] i1, float[] i2) {
     float result = 0;
@@ -32,9 +31,26 @@ class Matrix {
   void set(int r, int c, float v) {
     m[r][c] = v;
   }
+  
   void set(float[][] v) {
     m = v;
-  } 
+  }
+  
+  void setRandom(float v1, float v2){
+    for (int x = 0; x < rows; x++) {
+      for (int y = 0; y < cols; y++) {
+        m[x][y] = random(v1,v2);
+      }
+    }
+  }
+  
+  void copyM(Matrix m2){
+    for (int x = 0; x < rows; x++) {
+      for (int y = 0; y < cols; y++) {
+        m[x][y] = m2.m[x][y];
+      }
+    }
+  }
   float[] getRow(int r) {
     return m[r];
   }
@@ -44,5 +60,13 @@ class Matrix {
       result[x] = m[x][c];
     }
     return result;
+  }
+
+  void sigmoid() {
+    for (int x = 0; x < rows; x++) {
+      for (int y = 0; y < cols; y++) {
+        m[x][y] = AktivierungsFunktion.sigmoid(m[x][y]);
+      }
+    }
   }
 }

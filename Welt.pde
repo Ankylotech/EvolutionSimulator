@@ -202,6 +202,7 @@ public class Welt{
     
     for(Lebewesen lw : bewohner){
       lw.input();
+      lw.NN.update();
       lw.leben();
       lw.altern();
       lw.bewegen(lw.NN.getGeschwindigkeit(lw), lw.NN.getRotation());

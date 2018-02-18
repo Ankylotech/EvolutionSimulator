@@ -1,12 +1,8 @@
-import java.util.Scanner;
-
-
-
-
 PrintWriter output1;
 PrintWriter output2;
 PrintWriter output3;
 PrintWriter output4;
+
 int b =1;
 // fenstergroesse muss seperat geändert werden, sollte immer gleich sein & einen schönen Wert haben, z.B. 100, 500,...
 final int fensterGroesse = 1000;
@@ -57,8 +53,12 @@ void setup() {
 }
 
 void draw() {
+  try{
   for (int i=0; i<b; i++) {
     map.update();
+  }
+  }catch(Exception e){
+    e.printStackTrace();
   }
 }
 
