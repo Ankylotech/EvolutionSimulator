@@ -344,7 +344,7 @@ public class Lebewesen {
   }
 
   public Matrix mixMatrix(Matrix c1, Matrix c2) { // nimmt an, dass c1 und c2 gleich gross sind
-    Matrix mixedConnections = new Matrix(c1.cols,c1.rows);
+    Matrix mixedConnections = new Matrix(c1.rows,c1.cols);
     mixedConnections.copyM(c1);
     // mixedConnections wird zu Kopie von c1
     // Gewichte werden vermischt
