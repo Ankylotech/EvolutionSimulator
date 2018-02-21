@@ -51,8 +51,7 @@ class Feld {
     b = map.getFeldInArray(arrayPosX, arrayPosY-1);
     if (b != null) bewachsen.add(b);
     float rest;
-    Feld[] bewachseneFelder = bewachsen.toArray(new Feld[bewachsen.size()]);
-    for (Feld feld : bewachseneFelder) {
+    for (Feld feld : bewachsen) {
       if (!feld.isLand()) {
         regenerationsrate = maxRegenerationsrate;
         skip = true;
@@ -63,11 +62,10 @@ class Feld {
       while (bewachsen.size() > 0) {
         rest = maxRegenerationsrate - regenerationsrate;
 
-        bewachseneFelder = bewachsen.toArray(new Feld[bewachsen.size()]);
-        float[] bewachsenArr = new float[bewachseneFelder.length];
+        float[] bewachsenArr = new float[bewachsen.size()];
 
-        for (int i=0; i<bewachseneFelder.length; i++) {
-          bewachsenArr[i] = bewachseneFelder[i].getBewachsen();
+        for (int i=0; i<bewachsen.size(); i++) {
+          bewachsenArr[i] = bewachsen.get(i).getBewachsen();
         }
         float temp = max(bewachsenArr);
         if(temp>random(0.5,0.8)) regenerationsrate += temp * rest;
