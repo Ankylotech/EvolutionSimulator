@@ -72,35 +72,19 @@ public class NeuralNetwork {
   }
   ////Fuehler
 
-  // 1. Fuehler
-  public void setInputNFuehlerRichtung1(float v) {
-    inputSchicht.set(6, 0, v);
+  public void setInputNFuehlerRichtung(float v,int i) {
+    inputSchicht.set(6 + (i*4), 0, v);
+    
   }
-  public void setInputNFuehlerGegnerEnergie1(float v) {
-    inputSchicht.set(7, 0, v);
+  public void setInputNFuehlerGegnerEnergie(float v,int i) {
+    inputSchicht.set(7+ (i*4), 0, v);
   }
-  public void setInputNFuehlerFeldEnergie1(float v) {
-    inputSchicht.set(8, 0, v);
+  public void setInputNFuehlerFeldEnergie(float v,int i) {
+    inputSchicht.set(8+ (i*4), 0, v);
   }
-  public void setInputNFuehlerFeldArt1(float v) {
-    inputSchicht.set(9, 0, v);
+  public void setInputNFuehlerFeldArt(float v,int i) {
+    inputSchicht.set(9 + (i*4), 0, v);
   }
-
-  // 2. Fuehler
-
-  public void setInputNFuehlerRichtung2(float v) {
-    inputSchicht.set(10, 0, v);
-  }
-  public void setInputNFuehlerGegnerEnergie2(float v) {
-    inputSchicht.set(11, 0, v);
-  }
-  public void setInputNFuehlerFeldEnergie2(float v) {
-    inputSchicht.set(12, 0, v);
-  }
-  public void setInputNFuehlerFeldArt2(float v) {
-    inputSchicht.set(13, 0, v);
-  }
-
 
   // OutputNeuronen
   public float getGeschwindigkeit(Lebewesen lw) {
@@ -112,26 +96,26 @@ public class NeuralNetwork {
   public float getMemory() {
     return outputSchicht.get(2, 0);
   }
-  // Fuehler
-  public float getRotationFuehler1() {
-    return map(outputSchicht.get(3, 0), 0, 1, -Lebewesen.maxRotationswinkelFuehler/2, Lebewesen.maxRotationswinkelFuehler/2);
-  }
-  public float getRotationFuehler2() {
-    return map(outputSchicht.get(4, 0), 0, 1, -Lebewesen.maxRotationswinkelFuehler/2, Lebewesen.maxRotationswinkelFuehler/2);
-  }
+
 
 
   public float getFresswille() {
-    return outputSchicht.get(5, 0);
+    return outputSchicht.get(3, 0);
   }
   public float getGeburtwille() {
-    return outputSchicht.get(6, 0);
+    return outputSchicht.get(4, 0);
   }
 
   public float getAngriffswille() {
-    return outputSchicht.get(7, 0);
+    return outputSchicht.get(5, 0);
   }
 
+    // Fuehler
+    
+  public float getRotationFuehler(int i) {
+    return map(outputSchicht.get(6+i, 0), 0, 1, -Lebewesen.maxRotationswinkelFuehler/2, Lebewesen.maxRotationswinkelFuehler/2);
+  }
+  
   // andere getter
   public Matrix getConnections1() {
     return w1;

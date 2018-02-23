@@ -20,10 +20,11 @@ boolean save;
 
 int currentID = 0;
 
-public Welt map = new Welt(200, 200);
+public Welt map;
 
 void setup() {
   size(1000, 1000);
+  map = new Welt(200, 200);
   noStroke();
   skalierungsfaktor = 1;
   frameRate(50);

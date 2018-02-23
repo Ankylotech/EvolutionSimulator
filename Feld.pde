@@ -6,12 +6,14 @@ class Feld {
   private float energiewert = 0;
   private float maxEnergiewert;
   private float feldBreite;
-  private float maxRegenerationsrate = 1;
+  private float maxRegenerationsrate = 0.25;
+  private float[] bewachsen;
+  private boolean beeinflussbar;
 
   private int arrayPosX;
   private int arrayPosY;
 
-  final public static float maxEnergiewertAllgemein = 120;
+  final public static float maxEnergiewertAllgemein = 30;
 
   private int meeresspiegel = 45;
 
@@ -22,67 +24,41 @@ class Feld {
     feldBreite = fB;
     arrayPosX = aX;
     arrayPosY = aY;
+    bewachsen = new float[4];
 
     if (this.isLand()) {
       maxEnergiewert = maxEnergiewertAllgemein;
+      beeinflussbar = true;
     } else {
       maxRegenerationsrate = 0;
       maxEnergiewert = 0;
+      beeinflussbar = false;
     }
   }
 
   public void wachsen() { // Das ist wahrscheinlich ein Performance-fressendes Monster, sollte man bei Gelegenheit optimieren // btw das ist sehr hässlich geschrieben
     /*
     energiewert += regenerationsrate;
-    if (energiewert > maxEnergiewert){
-    energiewert = maxEnergiewert;
-    }
-    */
-    boolean skip = false;
-
-    ArrayList<Feld> bewachsen = new ArrayList<Feld>();
-
-    Feld b = map.getFeldInArray(arrayPosX-1, arrayPosY);
-    if (b != null) bewachsen.add(b);
-    b = map.getFeldInArray(arrayPosX+1, arrayPosY);
-    if (b != null) bewachsen.add(b);
-    b = map.getFeldInArray(arrayPosX, arrayPosY+1);
-    if (b != null) bewachsen.add(b);
-    b = map.getFeldInArray(arrayPosX, arrayPosY-1);
-    if (b != null) bewachsen.add(b);
-    float rest;
-    for (Feld feld : bewachsen) {
-      if (!feld.isLand()) {
-        regenerationsrate = maxRegenerationsrate;
-        skip = true;
-        break;
+     if (energiewert > maxEnergiewert){
+     energiewert = maxEnergiewert;
+     }
+     */
+    if (beeinflussbar) {
+      float rest = maxRegenerationsrate - regenerationsrate;
+      bewachsen = sort(bewachsen);
+      for (int i = 3; i >= 0; i--) { 
+        if (bewachsen[i] > 0.5) {
+          regenerationsrate += bewachsen[i] * rest;
+        }
       }
     }
-    if (!skip) {
-      while (bewachsen.size() > 0) {
-        rest = maxRegenerationsrate - regenerationsrate;
-
-        float[] bewachsenArr = new float[bewachsen.size()];
-
-        for (int i=0; i<bewachsen.size(); i++) {
-          bewachsenArr[i] = bewachsen.get(i).getBewachsen();
-        }
-        float temp = max(bewachsenArr);
-        if(temp>random(0.5,0.8)) regenerationsrate += temp * rest;
-        
-        Feld feldToRemove = null;
-        for(Feld feld : bewachsen){
-          if(feld.getBewachsen() == max(bewachsenArr)) feldToRemove = feld; // mögliche Fehlerquelle
-        }
-        
-        bewachsen.remove(feldToRemove);
-      }
-    }
+    
+    if (regenerationsrate>maxRegenerationsrate)regenerationsrate = maxRegenerationsrate;
     regenerationsrate *= meeresspiegel+20/nHoehe;
-    if(regenerationsrate>maxRegenerationsrate)regenerationsrate = maxRegenerationsrate;
+    if (regenerationsrate>maxRegenerationsrate)regenerationsrate = maxRegenerationsrate;
     energiewert += regenerationsrate;
-    if (energiewert > maxEnergiewert){
-    energiewert = maxEnergiewert;
+    if (energiewert > maxEnergiewert) {
+      energiewert = maxEnergiewert;
     }
   }
 
@@ -91,8 +67,8 @@ class Feld {
       return true;
     } else return false;
   }
-  public int isLandInt(){
-    if (nHoehe>meeresspiegel){
+  public int isLandInt() {
+    if (nHoehe>meeresspiegel) {
       return 1;
     } else return 0;
   }
@@ -119,5 +95,43 @@ class Feld {
 
   public float getBewachsen() {
     return energiewert/maxEnergiewertAllgemein;
+  }
+  public void vonWasserBeeinflussen() {
+    boolean wasser = false;
+    if (arrayPosX > 0 && !wasser) wasser = !map.getFeldInArray(arrayPosX-1, arrayPosY).isLand();
+    if (arrayPosY > 0 && !wasser) wasser = !map.getFeldInArray(arrayPosX, arrayPosY-1).isLand();
+    if (arrayPosX < weltGroesse -1 && !wasser) wasser = !map.getFeldInArray(arrayPosX+1, arrayPosY).isLand();
+    if (arrayPosY < weltGroesse -1 && !wasser) wasser = !map.getFeldInArray(arrayPosX, arrayPosY+1).isLand();
+    if (wasser) {
+      regenerationsrate = maxRegenerationsrate;
+      beeinflussbar = false;
+    }
+  }
+
+  public void nachbarnBeeinflussen() {
+    if (arrayPosX > 0) {
+      Feld f = map.getFeldInArray(arrayPosX-1, arrayPosY);
+      if (f.beeinflussbar) {
+        f.bewachsen[0] = getBewachsen();
+      }
+    };
+    if (arrayPosY > 0) {
+      Feld f = map.getFeldInArray(arrayPosX, arrayPosY-1);
+      if (f.beeinflussbar) {
+        f.bewachsen[1] = getBewachsen();
+      }
+    };
+    if (arrayPosX < weltGroesse -1) {
+      Feld f = map.getFeldInArray(arrayPosX+1, arrayPosY);
+      if (f.beeinflussbar) {
+        f.bewachsen[2] = getBewachsen();
+      }
+    };
+    if (arrayPosY < weltGroesse -1) {
+      Feld f = map.getFeldInArray(arrayPosX, arrayPosY+1);
+      if (f.beeinflussbar) {
+        f.bewachsen[3] = getBewachsen();
+      }
+    };
   }
 }
