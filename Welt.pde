@@ -42,9 +42,9 @@ public class Welt {
     lwZahl = lw;
     weltGroesse = weltG;
     //plots
-    fitness = new Plot(0, 250, 200, 200);
-    altersschnitt = new Plot(0, 250, 200, 200);
-    aeltestes = new Plot(0, 250, 200, 200);
+    fitness = new Plot(0, 150, 200, 200);
+    altersschnitt = new Plot(0, 150, 200, 200);
+    aeltestes = new Plot(0, 150, 200, 200);
     fitness.addValues(0, 0);
     altersschnitt.addValues(0, 0);
     aeltestes.addValues(0, 0);
@@ -58,7 +58,7 @@ public class Welt {
 
     // skaliert die Feldbreite and die Fenstergroesse und die Feldanzahl pro Reihe
     fB = fensterGroesse/weltGroesse;
-    stdDurchmesser = fB * 1.5;
+    stdDurchmesser = fB ;
 
     // generiert Welt
     welt = new Feld[weltGroesse][weltGroesse];
@@ -110,18 +110,16 @@ public class Welt {
   }
 
   public float entfernungLebewesen(Lebewesen lw1, Lebewesen lw2) {
-    //return sqrt(abs(lw1.getPosition().x - lw2.getPosition().x) + abs(lw1.getPosition().y - lw2.getPosition().y));
     return lw1.getPosition().dist(lw2.getPosition());
   }
 
   public void gebaeren(Lebewesen lw1, Lebewesen lw2) {
-    if ((lw1.NN.getGeburtwille()*lw1.calculateFitnessStandard() > Lebewesen.reproduktionswille && lw2.NN.getGeburtwille()*lw2.calculateFitnessStandard() > Lebewesen.reproduktionswille) //Beide LW muessen zustimmen
+    if (
+      (lw1.NN.getGeburtwille()>lw1.reproduktionsschwellwert && lw2.NN.getGeburtwille()>lw2.reproduktionsschwellwert)
       &&
       (lw1.getEnergie() >= Lebewesen.geburtsenergie && lw2.getEnergie() >= Lebewesen.geburtsenergie) // Beide LW muessen genug Energie haben
       &&
       (lw1.isGeburtsbereit() && lw2.isGeburtsbereit()) // Beide LW muessen geburtsbereit sein
-      //&&
-      //(lw1.calculateFitnessStandard() > this.getDurchschnittsFitness() && lw2.calculateFitnessStandard() > this.getDurchschnittsFitness()) // funktioniert nur bei Standardfitness
       )
     {
       // benötigte Geburtsenergie wird abgezogen
@@ -135,13 +133,14 @@ public class Welt {
       println("geburt" + geburten);
       // Neues Lebewesen mit gemischten Connections entsteht
       this.addLebewesen(
-        new Lebewesen((int)(posLw1.x + cos(PVector.angleBetween(posLw1, 
-        posLw2))*(lw1.getDurchmesser()/2)), 
+        new Lebewesen((int)(posLw1.x + cos(PVector.angleBetween(posLw1, posLw2))*(lw1.getDurchmesser()/2)), 
         (int)(posLw1.y + sin(PVector.angleBetween(posLw1, posLw2))*(lw1.getDurchmesser()/2)), 
         lw1.NN.getConnections1(), 
         lw1.NN.getConnections2(), 
         lw2.NN.getConnections1(), 
         lw2.NN.getConnections2(), 
+        lw1.NN.getConnections3(), 
+        lw2.NN.getConnections3(), 
         lw1.getFellfarbe(), 
         lw2.getFellfarbe(), 
         max(lw1.getGeneration(), lw2.getGeneration()), 
@@ -155,7 +154,18 @@ public class Welt {
         lw2.getReproduktionswartezeit(), 
         lw2.getAngriffswert(), 
 
-        currentID
+        currentID, 
+
+        chooseRandom(lw1.praeferenzFressrate, lw2.praeferenzFressrate), 
+        chooseRandom(lw1.praeferenzMaxGeschwindigkeit, lw2.praeferenzMaxGeschwindigkeit), 
+        chooseRandom(lw1.praeferenzAngriffswert, lw2.praeferenzAngriffswert), 
+        chooseRandom(lw1.praeferenzReproduktionswartezeit, lw2.praeferenzReproduktionswartezeit), 
+
+        chooseRandom(lw1.fressratenAnteil, lw2.fressratenAnteil), 
+        chooseRandom(lw1.maxGeschwAnteil, lw2.maxGeschwAnteil), 
+        chooseRandom(lw1.angriffsAnteil, lw2.angriffsAnteil), 
+        chooseRandom(lw1.repwarteAnteil, lw2.repwarteAnteil)
+
         ));
       currentID++;
       lw1.setLetzteGeburt((float)lw1.getAlter());
@@ -192,7 +202,7 @@ public class Welt {
     gesamtAlter = 0;
     gesamtFitness = 0;
 
-    for (int i = bewohner.size()-1;i>=0;i--) {
+    for (int i = bewohner.size()-1; i>=0; i--) {
       Lebewesen lw = bewohner.get(i);
       lw.input();
       lw.NN.update();
@@ -202,8 +212,8 @@ public class Welt {
       lw.fressen(lw.NN.getFresswille());
       lw.erinnern(lw.NN.getMemory());
       //lw.fellfarbeAendern(lw.NN.getFellRot(), lw.NN.getFellGruen(), lw.NN.getFellBlau());
-      for(int j = 0; j < lw.fuehlerZahl;j++){
-      lw.fuehlerRotieren(lw.NN.getRotationFuehler(j),j);
+      for (int j = 0; j < lw.fuehlerZahl; j++) {
+        lw.fuehlerRotieren(lw.NN.getRotationFuehler(j)+  lw.NN.getRotation(), j);
       }
       lw.angriff(lw.NN.getAngriffswille()); // hilft, Bevoelkerung nicht zu gross zu halten
 
@@ -213,7 +223,6 @@ public class Welt {
         bewohner.remove(bewohner.indexOf(lw));
         todeProJahr++;
       }
-    
     }
 
     todUndGeburt();
@@ -249,6 +258,8 @@ public class Welt {
         output2.flush();
         output3.print("(" + jahr + "," + gesamtFitness/bewohner.size() + ");");
         output3.flush();
+        output5.print("(" + jahr + "," + bewohner.size() + ");");
+        output5.flush();
       }
       if (jahr%1==0) {
         output4.print("(" + jahr + "," + todeProJahr + "," + geburtenProJahr + ");");
@@ -275,7 +286,7 @@ public class Welt {
 
     String jahre = "Jahre: " + jahr;
     fill(50, 200);
-    rect(weltX, weltY, 200/skalierungsfaktor, 250/skalierungsfaktor);
+    rect(weltX, weltY, 200/skalierungsfaktor, 150/skalierungsfaktor);
 
     fill(255);
     textSize(17/skalierungsfaktor);
@@ -374,6 +385,11 @@ public class Welt {
       }
     }
     return null;
+  }
+  float chooseRandom(float v1, float v2) {
+    if (random(1) > 0.5) {
+      return v1;
+    } else return v2;
   }
 
   public double getJahr() {

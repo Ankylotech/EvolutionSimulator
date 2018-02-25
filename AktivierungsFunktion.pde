@@ -11,8 +11,4 @@ public static class AktivierungsFunktion{
   static float tanh(float x){
     return (exp(x)-exp(-x))/(exp(x)+exp(-x));
   }
-  //range 0,infinity
-  static float relu(float x){
-    return max(0,x);
-  }
 }

@@ -27,16 +27,7 @@ try:
             x.append(make_tuple(i)[0])
             y.append(make_tuple(i)[1])
 
-            try:
-                ID = make_tuple(i)[2]
-                if ID != lastID:
-                    lastID = ID
-                    plt.plot(xCoordinate,yCoordinate, "ro", label=str(ID))
-                    plt.annotate(xy=(xCoordinate,yCoordinate), s=str(ID))
-            except:
-                pass
-                
-            
+              
         plt.plot(x,y)
         plt.xlabel("Jahre")
         plt.ylabel("Alter in Jahren")
@@ -100,6 +91,25 @@ try:
         plt.plot(x,y2,"g-")
         plt.xlabel("Jahre")
         plt.ylabel("Tode und Geburten")
+        plt.show()
+except:
+    pass
+
+x = []
+y = []
+
+path = currDir + "/data/population/population%s.txt"% myIndex
+
+try:
+    with open(path) as data:
+        data = data.read().split(";")
+        data.pop(-1)
+        for i in data:
+            x.append(make_tuple(i)[0])
+            y.append(make_tuple(i)[1])
+        plt.plot(x,y)
+        plt.xlabel("Jahre")
+        plt.ylabel("Populationsgröße")
         plt.show()
 except:
     pass

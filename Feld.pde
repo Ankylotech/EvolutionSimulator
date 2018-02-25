@@ -1,21 +1,23 @@
 class Feld {
 
+
+  final public static float maxEnergiewertAllgemein = 20;
   private float posX, posY;
   private float nHoehe; //noise-Hoehe
   private float regenerationsrate;
   private float energiewert = 0;
   private float maxEnergiewert;
   private float feldBreite;
-  private float maxRegenerationsrate = 0.25;
+  private float maxRegenerationsrate = maxEnergiewertAllgemein/140;
   private float[] bewachsen;
   private boolean beeinflussbar;
 
   private int arrayPosX;
   private int arrayPosY;
 
-  final public static float maxEnergiewertAllgemein = 30;
 
-  private int meeresspiegel = 45;
+
+  private int meeresspiegel = 42;
 
   Feld(float x, float y, float h, float fB, int aX, int aY) {
     posX = x;
@@ -36,30 +38,24 @@ class Feld {
     }
   }
 
-  public void wachsen() { // Das ist wahrscheinlich ein Performance-fressendes Monster, sollte man bei Gelegenheit optimieren // btw das ist sehr hässlich geschrieben
-    /*
-    energiewert += regenerationsrate;
-     if (energiewert > maxEnergiewert){
-     energiewert = maxEnergiewert;
-     }
-     */
+  public void wachsen() { 
+
     if (beeinflussbar) {
       float rest = maxRegenerationsrate - regenerationsrate;
       bewachsen = sort(bewachsen);
       for (int i = 3; i >= 0; i--) { 
-        if (bewachsen[i] > 0.5) {
+        if (bewachsen[i] > random(0.5, 0.9)) {
           regenerationsrate += bewachsen[i] * rest;
         }
+        rest = maxRegenerationsrate - regenerationsrate;
       }
     }
-    
-    if (regenerationsrate>maxRegenerationsrate)regenerationsrate = maxRegenerationsrate;
+
     regenerationsrate *= meeresspiegel+20/nHoehe;
     if (regenerationsrate>maxRegenerationsrate)regenerationsrate = maxRegenerationsrate;
+
     energiewert += regenerationsrate;
-    if (energiewert > maxEnergiewert) {
-      energiewert = maxEnergiewert;
-    }
+    if (energiewert > maxEnergiewert)energiewert = maxEnergiewert;
   }
 
   public boolean isLand() {

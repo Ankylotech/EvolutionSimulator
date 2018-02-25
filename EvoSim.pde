@@ -2,6 +2,7 @@ PrintWriter output1;
 PrintWriter output2;
 PrintWriter output3;
 PrintWriter output4;
+PrintWriter output5;
 
 int b =1;
 // fenstergroesse muss seperat geändert werden, sollte immer gleich sein & einen schönen Wert haben, z.B. 100, 500,...
@@ -45,6 +46,7 @@ void setup() {
     output2 = createWriter("./data/durchschnittsLw/durchschnittsLw"+fileNumber+".txt");
     output3 = createWriter("./data/durchschnittsFitnessLw/durchschnittsFitnessLw"+fileNumber+".txt");
     output4 = createWriter("./data/todeUndGeburtenLw/todeUndGeburtenLw"+fileNumber+".txt");
+    output5 = createWriter("./data/population/population"+fileNumber+".txt");
   }
 
 
@@ -54,11 +56,12 @@ void setup() {
 }
 
 void draw() {
-  try{
-  for (int i=0; i<b; i++) {
-    map.update();
+  try {
+    for (int i=0; i<b; i++) {
+      map.update();
+    }
   }
-  }catch(Exception e){
+  catch(Exception e) {
     e.printStackTrace();
   }
 }
@@ -68,11 +71,19 @@ void mouseWheel(MouseEvent event) {
   float e = event.getCount();
 
   skalierungsfaktor -= e / 10;
+  if (skalierungsfaktor<=0) {
+    skalierungsfaktor = e/10;
+  }
+  float rMouseX = (mouseX-(xOffsetGesamt))/skalierungsfaktor;
+  float rMouseY = (mouseY-(yOffsetGesamt))/skalierungsfaktor;
+
+  xOffsetGesamt += rMouseX * e/10;
+  yOffsetGesamt += rMouseY * e/10;
 }
 void mouseDragged() {
   if (locked) {
-    xOffset = (mouseX - xPressed) * skalierungsfaktor;
-    yOffset = (mouseY - yPressed) * skalierungsfaktor;
+    xOffset = (mouseX - xPressed) / skalierungsfaktor;
+    yOffset = (mouseY - yPressed) / skalierungsfaktor;
     xOffsetGesamt += xOffset;
     yOffsetGesamt += yOffset;
     xPressed = mouseX;
@@ -86,6 +97,11 @@ void keyPressed() {
   }
   if (key=='s') {
     b  = 1;
+  }
+  if (key ==' ') {
+    skalierungsfaktor = 1;
+    xOffsetGesamt = 0;
+    yOffsetGesamt = 0;
   }
 }
 void mousePressed() {
