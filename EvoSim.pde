@@ -56,14 +56,14 @@ void setup() {
 }
 
 void draw() {
-  try {
+  //try {
     for (int i=0; i<b; i++) {
       map.update();
     }
-  }
-  catch(Exception e) {
-    e.printStackTrace();
-  }
+  //}
+  //catch(Exception e) {
+  //  e.printStackTrace();
+  //}
 }
 
 // Eventhandler
@@ -82,8 +82,8 @@ void mouseWheel(MouseEvent event) {
 }
 void mouseDragged() {
   if (locked) {
-    xOffset = (mouseX - xPressed) / skalierungsfaktor;
-    yOffset = (mouseY - yPressed) / skalierungsfaktor;
+    xOffset = (mouseX - xPressed);
+    yOffset = (mouseY - yPressed);
     xOffsetGesamt += xOffset;
     yOffsetGesamt += yOffset;
     xPressed = mouseX;

@@ -58,7 +58,7 @@ public class Lebewesen {
 
     generation = 0;
 
-    NN = new NeuralNetwork(17, 17);
+    NN = new NeuralNetwork(18);
 
     praeferenzFressrate = random(0.5, 1.5);
     praeferenzMaxGeschwindigkeit = random(0.5, 1.5);
@@ -91,7 +91,7 @@ public class Lebewesen {
   }
 
   // 2. Konstruktor, damit die Farbe bei den Nachkommen berücksichtigt werden kann und die Gewichte übergeben werden können
-  Lebewesen(int x, int y, Matrix c11, Matrix c12, Matrix c21, Matrix c22, Matrix c13, Matrix c23, color fellfarbe1, color fellfarbe2, int g, float f1, float mG1, float r1, float a1, float f2, float mG2, float r2, float a2, int ID, float pF, float pMG, float pAn, float pRW, float fA, float mGA, float aA, float rWA) {
+  Lebewesen(int x, int y, Matrix c11, Matrix c12, Matrix c13, Matrix c14, Matrix c15, Matrix c16, Matrix c17, Matrix c21, Matrix c22, Matrix c23, Matrix c24, Matrix c25, Matrix c26, Matrix c27, color fellfarbe1, color fellfarbe2, int g, float f1, float mG1, float r1, float a1, float f2, float mG2, float r2, float a2, int ID, float pF, float pMG, float pAn, float pRW, float fA, float mGA, float aA, float rWA) {
     id = ID;
     durchmesser = map.getFeldbreite()*1.5;
     fuehlerZahl = 2;
@@ -134,16 +134,28 @@ public class Lebewesen {
     Matrix c1;
     Matrix c2;
     Matrix c3;
+    Matrix c4;
+    Matrix c5;
+    Matrix c6;
+    Matrix c7;
 
     c1 = this.mixMatrix(c11, c21);
     c2 = this.mixMatrix(c12, c22);
     c3 = this.mixMatrix(c13, c23);
+    c4 = this.mixMatrix(c14, c24);
+    c5 = this.mixMatrix(c15, c25);
+    c6 = this.mixMatrix(c16, c26);
+    c7 = this.mixMatrix(c17, c27);
 
     c1 = mutieren(c1);
     c2 = mutieren(c2);
     c3 = mutieren(c3);
+    c4 = mutieren(c4);
+    c5 = mutieren(c5);
+    c6 = mutieren(c6);
+    c7 = mutieren(c7);
 
-    NN = new NeuralNetwork(17, 17, c1, c2, c3);
+    NN = new NeuralNetwork(18, c1, c2, c3, c4, c5, c6, c7);
 
     geschwindigkeit = new PVector(maxGeschwindigkeit, maxGeschwindigkeit);
     geschwindigkeit.limit(maxGeschwindigkeit);
