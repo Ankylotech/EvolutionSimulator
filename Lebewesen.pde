@@ -1,27 +1,27 @@
 
-public class Lebewesen {
+public class Animal {
 
-  public final static int maxRotationswinkelBewegung = 20; /////////////////////////////// Version mit veraenderter Mutation
-  public final static int maxRotationswinkelFuehler = 10;
+  public final static int maxRotationAngle = 20; /////////////////////////////// Version mit veraenderter Mutation
+  public final static int maxRotationAngleSensor = 10;
 
-  private PVector geschwindigkeit;
+  private PVector velocity;
   private PVector position;
 
-  private float mutationsrate = 0.5;
-  private float durchmesser; // muss an Welt skaliert werden
-  private float fressrate = Welt.stdFressrate;
-  private float maxGeschwindigkeit = Welt.stdMaxGeschwindigkeit; //GEN
-  private float energie = 500.0;
-  private float maxEnergie = 2000.0; 
-  private color fellFarbe;
+  private float mutationRate = 0.5;
+  private float diameter; // muss an World skaliert werden
+  private float feedingRate = World.stdFeedingRate;
+  private float maxVelocity = World.stdmaxVelocity; //GEN
+  private float Energy = 500.0;
+  private float maxEnergy = 2000.0; 
+  private color furColor;
   private float verbrauchBewegung = 3;
-  private float verbrauchWasserbewegung = 5;
-  private float wasserreibung = 0.1;
-  private float energieverbrauch = 2;
+  private float verbrauchwaterbewegung = 5;
+  private float waterreibung = 0.1;
+  private float Energyverbrauch = 2;
   private boolean lebend = true;
-  public final static float geburtsenergie = 200;
-  private float reproduktionswartezeit = Welt.stdReproduktionswartezeit;
-  private float angriffswert = Welt.stdAngriffswert;
+  public final static float geburtsEnergy = 200;
+  private float reproduktionswTypeezeit = World.stdReproduktionswTypeezeit;
+  private float angriffswert = World.stdAngriffswert;
   public final static float reproduktionswille = 0.4;
   private boolean geburtsbereit = false;
   private float letzteGeburt = 0;
@@ -29,106 +29,106 @@ public class Lebewesen {
   private boolean rot = false;
   private float rotzeit = 0;
   private int generation;
-  private int fuehlerZahl;
-  private float fressratenAnteil;
+  private int SensorZahl;
+  private float feedingRatenAnteil;
   private float maxGeschwAnteil;
   private float angriffsAnteil;
-  private float repwarteAnteil;
-  float praeferenzFressrate;
-  float praeferenzMaxGeschwindigkeit;
+  private float repwTypeeAnteil;
+  float praeferenzfeedingRate;
+  float praeferenzmaxVelocity;
   float praeferenzAngriffswert;
-  float praeferenzReproduktionswartezeit;
+  float praeferenzReproduktionswTypeezeit;
 
 
   private int id;
 
   private double alter = 0;
 
-  private Fuehler[] fuehler;
+  private Sensor[] Sensor;
 
   private NeuralNetwork NN;
   private float memory = 1; // GEN
 
 
   // sollte bei 1. Generation verwendet werden
-  Lebewesen(int x, int y, float fB, int ID) {
+  Animal(int x, int y, float fB, int ID) {
     id = ID;
-    durchmesser = fB*1.5;
-    fuehlerZahl = 2;
+    diameter = fB*1.5;
+    SensorZahl = 2;
 
     generation = 0;
 
     NN = new NeuralNetwork(18);
 
-    praeferenzFressrate = random(0.5, 1.5);
-    praeferenzMaxGeschwindigkeit = random(0.5, 1.5);
+    praeferenzfeedingRate = random(0.5, 1.5);
+    praeferenzmaxVelocity = random(0.5, 1.5);
     praeferenzAngriffswert = random(0.5, 1.5);
-    praeferenzReproduktionswartezeit = random(0.5, 1.5);
+    praeferenzReproduktionswTypeezeit = random(0.5, 1.5);
 
-    fressratenAnteil = 1;
+    feedingRatenAnteil = 1;
     maxGeschwAnteil = 1;
     angriffsAnteil = 1;
-    repwarteAnteil = 1;
+    repwTypeeAnteil = 1;
 
-    float anteilSumme = fressratenAnteil+ maxGeschwAnteil +angriffsAnteil + repwarteAnteil;
+    float anteilSumme = feedingRatenAnteil+ maxGeschwAnteil +angriffsAnteil + repwTypeeAnteil;
 
-    fressrate = (fressratenAnteil/anteilSumme)*4*Welt.stdFressrate;
-    maxGeschwindigkeit = (maxGeschwAnteil/anteilSumme)*4*Welt.stdMaxGeschwindigkeit;
-    angriffswert = (angriffsAnteil/anteilSumme)*Welt.stdAngriffswert*4;
-    reproduktionswartezeit= (repwarteAnteil/anteilSumme)*Welt.stdReproduktionswartezeit*4;
+    feedingRate = (feedingRatenAnteil/anteilSumme)*4*World.stdFeedingRate;
+    maxVelocity = (maxGeschwAnteil/anteilSumme)*4*World.stdmaxVelocity;
+    angriffswert = (angriffsAnteil/anteilSumme)*World.stdAngriffswert*4;
+    reproduktionswTypeezeit= (repwTypeeAnteil/anteilSumme)*World.stdReproduktionswTypeezeit*4;
 
-    geschwindigkeit = new PVector(maxGeschwindigkeit, maxGeschwindigkeit);
-    geschwindigkeit.limit(maxGeschwindigkeit);
+    velocity = new PVector(maxVelocity, maxVelocity);
+    velocity.limit(maxVelocity);
 
     position = new PVector(x, y);
 
-    fuehler = new Fuehler[fuehlerZahl];
-    for (int i = 0; i<fuehlerZahl; i++) {
-      fuehler[i] = new Fuehler(this);
+    Sensor = new Sensor[SensorZahl];
+    for (int i = 0; i<SensorZahl; i++) {
+      Sensor[i] = new Sensor(this);
     }
 
-    fellFarbe = color((int)random(0, 256), (int)random(0, 256), (int)random(0, 256));
+    furColor = color((int)random(0, 256), (int)random(0, 256), (int)random(0, 256));
   }
 
   // 2. Konstruktor, damit die Farbe bei den Nachkommen berücksichtigt werden kann und die Gewichte übergeben werden können
-  Lebewesen(int x, int y, Matrix c11, Matrix c12, Matrix c13, Matrix c14, Matrix c15, Matrix c16, Matrix c17, Matrix c21, Matrix c22, Matrix c23, Matrix c24, Matrix c25, Matrix c26, Matrix c27, color fellfarbe1, color fellfarbe2, int g, float f1, float mG1, float r1, float a1, float f2, float mG2, float r2, float a2, int ID, float pF, float pMG, float pAn, float pRW, float fA, float mGA, float aA, float rWA) {
+  Animal(int x, int y, Matrix c11, Matrix c12, Matrix c13, Matrix c14, Matrix c15, Matrix c16, Matrix c17, Matrix c21, Matrix c22, Matrix c23, Matrix c24, Matrix c25, Matrix c26, Matrix c27, color fellfarbe1, color fellfarbe2, int g, float f1, float mG1, float r1, float a1, float f2, float mG2, float r2, float a2, int ID, float pF, float pMG, float pAn, float pRW, float fA, float mGA, float aA, float rWA) {
     id = ID;
-    durchmesser = map.getFeldbreite()*1.5;
-    fuehlerZahl = 2;
+    diameter = map.getTileWidth()*1.5;
+    SensorZahl = 2;
 
-    praeferenzFressrate = constrain(mutieren(pF), 0, 2);
-    praeferenzMaxGeschwindigkeit =  constrain(mutieren(pMG), 0, 2);
+    praeferenzfeedingRate = constrain(mutieren(pF), 0, 2);
+    praeferenzmaxVelocity =  constrain(mutieren(pMG), 0, 2);
     praeferenzAngriffswert =  constrain(mutieren(pAn), 0, 2);
-    praeferenzReproduktionswartezeit =  constrain(mutieren(pRW), 0, 2);
+    praeferenzReproduktionswTypeezeit =  constrain(mutieren(pRW), 0, 2);
 
-    fressrate = mutieren(mixGenes(f1, f2));
-    maxGeschwindigkeit = mutieren(mixGenes(mG1, mG2));
-    reproduktionswartezeit = mutieren(mixGenes(r1, r2));
+    feedingRate = mutieren(mixGenes(f1, f2));
+    maxVelocity = mutieren(mixGenes(mG1, mG2));
+    reproduktionswTypeezeit = mutieren(mixGenes(r1, r2));
     angriffswert = mutieren(mixGenes(a1, a2));
 
     generation = g+1;
-    energie = geburtsenergie;
+    Energy = geburtsEnergy;
 
-    fressratenAnteil = mutieren(fA, 0, 99); // 99 muss geaendert werden
+    feedingRatenAnteil = mutieren(fA, 0, 99); // 99 muss geaendert werden
     maxGeschwAnteil = mutieren(mGA, 0, 99);
     angriffsAnteil = mutieren(aA, 0, 99);
-    repwarteAnteil = mutieren(rWA, 0, 99);
+    repwTypeeAnteil = mutieren(rWA, 0, 99);
 
-    float anteilSumme = fressratenAnteil+ maxGeschwAnteil +angriffsAnteil + repwarteAnteil;
+    float anteilSumme = feedingRatenAnteil+ maxGeschwAnteil +angriffsAnteil + repwTypeeAnteil;
 
-    fressrate = (fressratenAnteil/anteilSumme)*4*Welt.stdFressrate;
-    maxGeschwindigkeit = (maxGeschwAnteil/anteilSumme)*4*Welt.stdMaxGeschwindigkeit;
-    angriffswert = (angriffsAnteil/anteilSumme)*Welt.stdAngriffswert*4;
-    reproduktionswartezeit= (repwarteAnteil/anteilSumme)*Welt.stdReproduktionswartezeit*4;  
+    feedingRate = (feedingRatenAnteil/anteilSumme)*4*World.stdFeedingRate;
+    maxVelocity = (maxGeschwAnteil/anteilSumme)*4*World.stdmaxVelocity;
+    angriffswert = (angriffsAnteil/anteilSumme)*World.stdAngriffswert*4;
+    reproduktionswTypeezeit= (repwTypeeAnteil/anteilSumme)*World.stdReproduktionswTypeezeit*4;  
 
     // fellfarbe wird random aus beiden Elternteilen gewaehlt
     if (random(0, 1)>0.5) {
-      fellFarbe = fellfarbe1;
+      furColor = fellfarbe1;
     } else {
-      fellFarbe = fellfarbe2;
+      furColor = fellfarbe2;
     }
 
-    fellFarbe = fellfarbeMutieren(fellFarbe);
+    furColor = fellfarbeMutieren(furColor);
 
     // Connections
     Matrix c1;
@@ -157,124 +157,124 @@ public class Lebewesen {
 
     NN = new NeuralNetwork(18, c1, c2, c3, c4, c5, c6, c7);
 
-    geschwindigkeit = new PVector(maxGeschwindigkeit, maxGeschwindigkeit);
-    geschwindigkeit.limit(maxGeschwindigkeit);
+    velocity = new PVector(maxVelocity, maxVelocity);
+    velocity.limit(maxVelocity);
 
     position = new PVector(x, y);
 
-    fuehler = new Fuehler[fuehlerZahl];
-    for (int i = 0; i<fuehlerZahl; i++) {
-      fuehler[i] = new Fuehler(this);
+    Sensor = new Sensor[SensorZahl];
+    for (int i = 0; i<SensorZahl; i++) {
+      Sensor[i] = new Sensor(this);
     }
   }
 
-  public void drawLebewesen() {
-    PVector richtung = new PVector(geschwindigkeit.x, geschwindigkeit.y);
-    durchmesser = map.stdDurchmesser * energie/2000 + 10 ;
+  public void drawAnimal() {
+    PVector Heading = new PVector(velocity.x, velocity.y);
+    diameter = map.stddiameter * Energy/2000 + 10 ;
     if (rotzeit == 0) {
-      fill(fellFarbe);
+      fill(furColor);
     } else if (rot) {
       fill(255, 0, 0);
       rotzeit--;
     } else {
-      fill(fellFarbe);
+      fill(furColor);
       rotzeit--;
     }
     if (rotzeit %4==0) {
       rot = !rot;
     }
-    for (Fuehler f : fuehler) {
-      f.drawFuehler();
+    for (Sensor f : Sensor) {
+      f.drawSensor();
     }
-    richtung.setMag(durchmesser/2);
-    ellipse(position.x, position.y, durchmesser, durchmesser );
-    line(position.x, position.y, position.x + richtung.x, position.y + richtung .y);
+    Heading.setMag(diameter/2);
+    ellipse(position.x, position.y, diameter, diameter );
+    line(position.x, position.y, position.x + Heading.x, position.y + Heading .y);
   }
 
   // NeuralNetwork input
   public void input() {
-    // Geschwindigkeit
-    NN.setInputNGeschwindigkeit(map(geschwindigkeit.mag(), 0, maxGeschwindigkeit, -6, 6));
-    // eigene Energie
-    NN.setInputNEnergie(map(energie, 0, maxEnergie, -6, 6));
-    // Feldart
-    //println("\n\ngetInputNFeldArt");
-    NN.setInputNFeldart(map(map.getFeld((int)position.x, (int)position.y).isLandInt(), 0, 1, -6, 6));
+    // velocity
+    NN.setInputNvelocity(map(velocity.mag(), 0, maxVelocity, -6, 6));
+    // eigene Energy
+    NN.setInputNEnergy(map(Energy, 0, maxEnergy, -6, 6));
+    //TileType
+    //println("\n\ngetInputNTileType");
+    NN.setInputNTileType(map(map.getTile((int)position.x, (int)position.y).isLandInt(), 0, 1, -6, 6));
     // Memory
     NN.setInputNMemory(map(memory, 0, 1, -6, 6));
     // Bias // immer 1
     NN.setInputNBias(1);
-    // Richtung
-    NN.setInputNRichtung(map(degrees(geschwindigkeit.heading()), -180, 180, -6, 6));
+    // Heading
+    NN.setInputNHeading(map(degrees(velocity.heading()), -180, 180, -6, 6));
 
 
-    //// Fuehler 
+    //// Sensor 
 
-    for (int i = 0; i<fuehler.length; i++) {
-      // Richtung Fuehler 
-      NN.setInputNFuehlerRichtung(map(fuehler[i].getRichtung(), -180, 180, -6, 6), i);//                                                                  Hier könnte es Probleme mit map geben
-      // Gegnerenergie
-      //float[] gegnerEnergie1 = fuehler1.getFuehlerGegnerEnergie();
-      NN.setInputNFuehlerGegnerEnergie(map(fuehler[i].getFuehlerGegnerEnergie(), 0, maxEnergie, -6, 6), i);// maxEnergie muss geändert werden, falls die maximale Energie von Tier zu Tier variieren kann
-      // Feldenergie
-      //float[] feldEnergie1 = fuehler1.getFuehlerFeldEnergie();
-      NN.setInputNFuehlerFeldEnergie(map(fuehler[i].getFuehlerFeldEnergie(), 0, Feld.maxEnergiewertAllgemein, -6, 6), i);
-      // Feldart
-      NN.setInputNFuehlerFeldArt(map(fuehler[i].getFuehlerFeldArt(), 0, 1, -6, 6), i);
+    for (int i = 0; i<Sensor.length; i++) {
+      // Heading Sensor 
+      NN.setInputNSensorHeading(map(Sensor[i].getHeading(), -180, 180, -6, 6), i);//                                                                  Hier könnte es Probleme mit map geben
+      // EnemyEnergy
+      //float[] EnemyEnergy1 = Sensor1.getSensorEnemyEnergy();
+      NN.setInputNSensorEnemyEnergy(map(Sensor[i].getSensorEnemyEnergy(), 0, maxEnergy, -6, 6), i);// maxEnergy muss geändert werden, falls die maximale Energy von Tier zu Tier variieren kann
+      //TileEnergy
+      //float[]TileEnergy1 = Sensor1.getSensorTileEnergy();
+      NN.setInputNSensorTileEnergy(map(Sensor[i].getSensorTileEnergy(), 0,Tile.maxOverallEnergy, -6, 6), i);
+      //TileType
+      NN.setInputNSensorTileType(map(Sensor[i].getSensorTileType(), 0, 1, -6, 6), i);
       // Genetic Difference
-      NN.setInputNFuehlerGenDiff(map(fuehler[i].getFuehlerFeldArt(), 0, 4, -6, 6), i);
+      NN.setInputNSensorGenDiff(map(Sensor[i].getSensorTileType(), 0, 4, -6, 6), i);
     }
   }
 
   // Bewewgung
-  public void bewegen(float v, float angle) { // Rotationswinkel in Grad
-    if (v<maxGeschwindigkeit && v>=0) { // Bewegungsverbrauch passt sich an momentane geschwindigkeit an
-      energie-=verbrauchBewegung*(v*0.75);
-      geschwindigkeit.rotate(radians(angle));
-      geschwindigkeit.setMag(v);
+  public void bewegen(float v, float angle) { // RotationAngle in Grad
+    if (v<maxVelocity && v>=0) { // Bewegungsverbrauch passt sich an momentane velocity an
+      Energy-=verbrauchBewegung*(v*0.75);
+      velocity.rotate(radians(angle));
+      velocity.setMag(v);
 
-      // im Wasser bewegen sich die Lebewesen langsamer und verbrauchen mehr Energie
-      if (!map.getFeld((int)position.x, (int)position.y).isLand()) {
-        position.add(geschwindigkeit.mult(1-wasserreibung));
-        energie -= verbrauchWasserbewegung;
+      // im water bewegen sich die Animal langsamer und verbrauchen mehr Energy
+      if (!map.getTile((int)position.x, (int)position.y).isLand()) {
+        position.add(velocity.mult(1-waterreibung));
+        Energy -= verbrauchwaterbewegung;
       } else {
-        position.add(geschwindigkeit);
+        position.add(velocity);
       }
 
-      // Lebewesen werden auf die gegenüberliegende Seite teleportiert, wenn sie außerhalb der Map sind
-      if (position.x > fensterGroesse) { // wenn zu weit rechts        
-        position.set(position.x-fensterGroesse, position.y);
+      // Animal werden auf die gegenüberliegende Seite teleportiert, wenn sie außerhalb der Map sind
+      if (position.x > screenSize) { // wenn zu weit rechts        
+        position.set(position.x-screenSize, position.y);
       }
       if (position.x < 0) { // wenn zu weit links       
-        position.set(fensterGroesse+position.x, position.y); // + position.x, weil es immer ein negativer Wert ist
+        position.set(screenSize+position.x, position.y); // + position.x, weil es immer ein negativer Wert ist
       }
-      if (position.y > fensterGroesse) { // wenn zu weit unten
-        position.set(position.x, position.y-fensterGroesse);
+      if (position.y > screenSize) { // wenn zu weit unten
+        position.set(position.x, position.y-screenSize);
       }
       if (position.y < 0) { // wenn zu weit oben
-        position.set(position.x, fensterGroesse+position.y); // + position.y, weil es immer ein negativer Wert ist
+        position.set(position.x, screenSize+position.y); // + position.y, weil es immer ein negativer Wert ist
       }
     }
   }
-  // Angriff auf Gegner
+  // Angriff auf Enemy
   public void angriff(float wille) {
     if (wille > 0.5) {
-      addEnergie(-energieverbrauch*(angriffswert*0.5));
-      // Opfer nur DIREKT vor dem Lebewesen (d.h. in Geschwindigkeitsrichtung) kann angegriffen werden
-      PVector opferPosition = new PVector(cos(geschwindigkeit.heading())*durchmesser+position.x, position.y-sin(geschwindigkeit.heading())*durchmesser);
+      addEnergy(-Energyverbrauch*(angriffswert*0.5));
+      // Opfer nur DIREKT vor dem Animal (d.h. in velocitysHeading) kann angegriffen werden
+      PVector opferPosition = new PVector(cos(velocity.heading())*diameter+position.x, position.y-sin(velocity.heading())*diameter);
 
-      Lebewesen opfer = map.getTier((int)(opferPosition.x), (int)(opferPosition.y));
+      Animal opfer = map.getTier((int)(opferPosition.x), (int)(opferPosition.y));
 
       if (!(opfer == null)) {
-        if (opfer.getEnergie() >= angriffswert) {
-          opfer.addEnergie(-angriffswert);
-          this.addEnergie(angriffswert);
+        if (opfer.getEnergy() >= angriffswert) {
+          opfer.addEnergy(-angriffswert);
+          this.addEnergy(angriffswert);
         } else {
-          this.addEnergie(opfer.getEnergie());
-          opfer.setEnergie(0);
+          this.addEnergy(opfer.getEnergy());
+          opfer.setEnergy(0);
         }
-        if (energie>maxEnergie) { // Lebewesen-Energie ist über dem Maximum
-          energie = maxEnergie;
+        if (Energy>maxEnergy) { // Animal-Energy ist über dem Maximum
+          Energy = maxEnergy;
         }
         opfer.hit();
       }
@@ -283,7 +283,7 @@ public class Lebewesen {
 
   // Grundverbrauch
   public void leben() {
-    energie -= energieverbrauch*(alter/10);
+    Energy -= Energyverbrauch*(alter/10);
   }
   public void hit() {
     rotzeit = 30;
@@ -292,60 +292,60 @@ public class Lebewesen {
   // Fitnessfunktion // Fitness wird nur beim Rufen der Methode gerufen
   public float calculateFitnessStandard() { // berechnet die Fitness des Tieres im Bezug auf die Standardwerte
     float alter = sq((float)this.getAlter())*0.5;
-    float fressrate = (this.getFressrate() - Welt.stdFressrate)/Welt.stdFressrate;
-    float maxV = (this.getMaxGeschwindigkeit() - Welt.stdMaxGeschwindigkeit)/Welt.stdMaxGeschwindigkeit;
-    float angriff = (this.getAngriffswert() - Welt.stdAngriffswert)/Welt.stdAngriffswert;
-    float wartezeit = Welt.stdReproduktionswartezeit/this.getReproduktionswartezeit() - 1;
-    float result = alter + fressrate + maxV + angriff + wartezeit;
-    //println(alter + " " + fressrate + " " + maxV + " " + angriff + " " + wartezeit + " " + result);
+    float feedingRate = (this.getfeedingRate() - World.stdFeedingRate)/World.stdFeedingRate;
+    float maxV = (this.getmaxVelocity() - World.stdmaxVelocity)/World.stdmaxVelocity;
+    float angriff = (this.getAngriffswert() - World.stdAngriffswert)/World.stdAngriffswert;
+    float wTypeezeit = World.stdReproduktionswTypeezeit/this.getReproduktionswTypeezeit() - 1;
+    float result = alter + feedingRate + maxV + angriff + wTypeezeit;
+    //println(alter + " " + feedingRate + " " + maxV + " " + angriff + " " + wTypeezeit + " " + result);
     return result;
   }
 
-  public float calculateGeneticDifference(Lebewesen partner) { // berechnet die Fitness des Tieres im Bezug auf eigene Werte
-    float fressrate = map(abs(partner.getFressrate() - getFressrate()), 0, 4*Welt.stdFressrate, 0, 1);
-    float maxV = map(abs(partner.getMaxGeschwindigkeit() - getMaxGeschwindigkeit()), 0, 4*Welt.stdMaxGeschwindigkeit, 0, 1);
-    float angriff = map(abs(partner.getAngriffswert() - getAngriffswert()), 0, 4* Welt.stdAngriffswert, 0, 1);
-    float wartezeit = map(abs(partner.getReproduktionswartezeit() - getReproduktionswartezeit() ), 0, 4* Welt.stdReproduktionswartezeit, 0, 1);
-    float result = fressrate + maxV + angriff + wartezeit;
+  public float calculateGeneticDifference(Animal pTypener) { // berechnet die Fitness des Tieres im Bezug auf eigene Werte
+    float feedingRate = map(abs(pTypener.getfeedingRate() - getfeedingRate()), 0, 4*World.stdFeedingRate, 0, 1);
+    float maxV = map(abs(pTypener.getmaxVelocity() - getmaxVelocity()), 0, 4*World.stdmaxVelocity, 0, 1);
+    float angriff = map(abs(pTypener.getAngriffswert() - getAngriffswert()), 0, 4* World.stdAngriffswert, 0, 1);
+    float wTypeezeit = map(abs(pTypener.getReproduktionswTypeezeit() - getReproduktionswTypeezeit() ), 0, 4* World.stdReproduktionswTypeezeit, 0, 1);
+    float result = feedingRate + maxV + angriff + wTypeezeit;
     return result;
   }
   // Fressen
   public void fressen(float wille) {
     if (wille > 0.5) {
-      energie -= energieverbrauch*(alter/4);
+      Energy -= Energyverbrauch*(alter/4);
       //println("\n\nfressen");
-      Feld feld = map.getFeld((int)position.x, (int)position.y);
-      float neueFeldEnergie = feld.getEnergie() - fressrate;
+     Tile Tile = map.getTile((int)position.x, (int)position.y);
+      float neueTileEnergy =Tile.getEnergy() - feedingRate;
 
-      if (neueFeldEnergie>=0) { // Feld hat genug Energie
-        energie += fressrate;
-        feld.setEnergie((int)neueFeldEnergie);
-      } else { // Feld hat zu wenig Energie
-        energie += feld.getEnergie();
-        feld.setEnergie(0);
+      if (neueTileEnergy>=0) { //Tile hat genug Energy
+        Energy += feedingRate;
+       Tile.setEnergy((int)neueTileEnergy);
+      } else { //Tile hat zu wenig Energy
+        Energy +=Tile.getEnergy();
+       Tile.setEnergy(0);
       }
 
-      if (energie>maxEnergie) { // Lebewesen-Energie ist über dem Maximum
-        feld.setEnergie((int)(feld.getEnergie()+(energie-maxEnergie)));
-        energie = maxEnergie;
+      if (Energy>maxEnergy) { // Animal-Energy ist über dem Maximum
+       Tile.setEnergy((int)(Tile.getEnergy()+(Energy-maxEnergy)));
+        Energy = maxEnergy;
       }
     }
   }
 
   // Gebaeren
-  // wird in Welt Klasse verlegt
+  // wird in World Klasse verlegt
 
   /*
-  if(wille > 0.5 && energie >= geburtsenergie && ((float)alter % reproduktionsWartezeit == 0)){ // Bedingung ist so seltsam, weil das Alter ungenau ist
-   energie -= geburtsenergie;
-   map.addLebewesen(new Lebewesen((int)position.x, (int)position.y, NN.getConnections1(), NN.getConnections2(), fellFarbe));
+  if(wille > 0.5 && Energy >= geburtsEnergy && ((float)alter % reproduktionsWTypeezeit == 0)){ // Bedingung ist so seltsam, weil das Alter ungenau ist
+   Energy -= geburtsEnergy;
+   map.addAnimal(new Animal((int)position.x, (int)position.y, NN.getConnections1(), NN.getConnections2(), furColor));
    println("Ein neues Früchtchen ist entsprungen!");
    }
    */  // Das wird viel :((
 
-  public boolean collision(Lebewesen lw) {
-    float abstand = map.entfernungLebewesen(this, lw);
-    if (abstand <= durchmesser) {
+  public boolean collision(Animal lw) {
+    float distance = map.entfernungAnimal(this, lw);
+    if (distance <= diameter) {
       return true;
     } else {
       return false;
@@ -375,12 +375,12 @@ public class Lebewesen {
     return color(r, g, b);
   }
 
-  // Fuehler 1 rotieren
-  public void fuehlerRotieren(float angle, int i) {
-    fuehler[i].fuehlerRotieren(angle);
+  // Sensor 1 rotieren
+  public void rotateSensor(float angle, int i) {
+    Sensor[i].rotateSensor(angle);
   }
 
-  // Fuehler 2 rotieren
+  // Sensor 2 rotieren
 
 
   // mutiert Gewichte
@@ -388,7 +388,7 @@ public class Lebewesen {
     for (int x=0; x<m.rows; x++) {
       for (int y=0; y<m.cols; y++) {
         if (random(0, 1)>0.3) {
-          float multiplikator = random(-mutationsrate, mutationsrate);
+          float multiplikator = random(-mutationRate, mutationRate);
           float neuerWert = m.get(x, y)+multiplikator*m.get(x, y);
           if (neuerWert > 1) {
             neuerWert = 1;
@@ -404,14 +404,14 @@ public class Lebewesen {
   public float mutieren(float x) { // x ist der Wert, der mutiert wird
     float a = x;
     if (random(0, 1)>0.5) {
-      a += random(-mutationsrate, mutationsrate)*x/4;
+      a += random(-mutationRate, mutationRate)*x/4;
     }
     return a;
   }
   public float mutieren(float x, float v1, float v2) { // x ist der Wert, der mutiert wird
     float a = x;
     if (random(0, 1)>0.5) {
-      a += random(-mutationsrate, mutationsrate)*x/4;
+      a += random(-mutationRate, mutationRate)*x/4;
     }
 
     return constrain(a, v1, v2);
@@ -445,7 +445,7 @@ public class Lebewesen {
     alter = (double)floor(neuesAlter) / (double)map.getZeitMultiplikator();
 
     // geburtsbereit
-    if (alter - letzteGeburt >= reproduktionswartezeit) {
+    if (alter - letzteGeburt >= reproduktionswTypeezeit) {
       geburtsbereit = true;
     } else {
       geburtsbereit = false;
@@ -457,15 +457,15 @@ public class Lebewesen {
   }
 
   public void fellfarbeAendern(float r, float g, float b) {
-    fellFarbe = color(r, g, b);
+    furColor = color(r, g, b);
   }
 
-  public void addEnergie(float e) {
-    energie += e;
+  public void addEnergy(float e) {
+    Energy += e;
   }
 
-  public void setEnergie(float e) {
-    energie = e;
+  public void setEnergy(float e) {
+    Energy = e;
   }
 
   public void setLetzteGeburt(float lG) {
@@ -474,19 +474,19 @@ public class Lebewesen {
 
   // getter 
   public boolean getStatus() {
-    if (energie<0) {
+    if (Energy<0) {
       lebend = false;
     }
     return lebend;
   }
-  public float getMaxGeschwindigkeit() {
-    return maxGeschwindigkeit;
+  public float getmaxVelocity() {
+    return maxVelocity;
   }
-  public float getEnergie() {
-    return energie;
+  public float getEnergy() {
+    return Energy;
   }
-  public float getMaxEnergie() {
-    return maxEnergie;
+  public float getMaxEnergy() {
+    return maxEnergy;
   }
   public PVector getPosition() {
     return position;
@@ -498,22 +498,22 @@ public class Lebewesen {
     return geburtsbereit;
   }
   public color getFellfarbe() {
-    return fellFarbe;
+    return furColor;
   }
-  public float getDurchmesser() {
-    return durchmesser;
+  public float getDiameter() {
+    return diameter;
   }
   public int getGeneration() {
     return generation;
   }
-  public float getFressrate() {
-    return fressrate;
+  public float getfeedingRate() {
+    return feedingRate;
   }
   public float getAngriffswert() {
     return angriffswert;
   }
-  public float getReproduktionswartezeit() {
-    return reproduktionswartezeit;
+  public float getReproduktionswTypeezeit() {
+    return reproduktionswTypeezeit;
   }
   public int getID() {
     return id;

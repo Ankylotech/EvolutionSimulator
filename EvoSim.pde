@@ -5,14 +5,14 @@ PrintWriter output4;
 PrintWriter output5;
 
 int b =1;
-// fenstergroesse muss seperat geändert werden, sollte immer gleich sein & einen schönen Wert haben, z.B. 100, 500,...
-final int fensterGroesse = 1000;
-private int weltGroesse;
-private float skalierungsfaktor;
+// screenSize muss seperat geändert werden, sollte immer gleich sein & einen schönen Wert haben, z.B. 100, 500,...
+final int screenSize = 1000;
+private int worldSize;
+private float scaling;
 private float xOffset = 0.0;
 private float yOffset = 0.0;
-private float xOffsetGesamt = 0.0;
-private float yOffsetGesamt = 0.0;
+private float xOveralOffset = 0.0;
+private float yOveralOffset = 0.0;
 private float xPressed, yPressed;
 private boolean locked = false;
 int fileNumber;
@@ -21,13 +21,13 @@ boolean save;
 
 int currentID = 0;
 
-public Welt map;
+public World map;
 
 void setup() {
-  size(1000, 1000);
-  map = new Welt(200, 200);
+  fullScreen();
+  map = new World(200, 200);
   noStroke();
-  skalierungsfaktor = 1;
+  scaling = 1;
   frameRate(50);
 
   save = true;
@@ -51,8 +51,8 @@ void setup() {
 
 
 
-  map.showWelt();
-  map.showLebewesen(map.getLebewesen());
+  map.showWorld();
+  map.showAnimal(map.getAnimal());
 }
 
 void draw() {
@@ -70,22 +70,22 @@ void draw() {
 void mouseWheel(MouseEvent event) {
   float e = event.getCount();
 
-  skalierungsfaktor -= e / 10;
-  if (skalierungsfaktor<=0) {
-    skalierungsfaktor = e/10;
+  scaling -= e / 10;
+  if (scaling<=0) {
+    scaling = e/10;
   }
-  float rMouseX = (mouseX-(xOffsetGesamt))/skalierungsfaktor;
-  float rMouseY = (mouseY-(yOffsetGesamt))/skalierungsfaktor;
+  float rMouseX = (mouseX-(xOveralOffset))/scaling;
+  float rMouseY = (mouseY-(yOveralOffset))/scaling;
 
-  xOffsetGesamt += rMouseX * e/10;
-  yOffsetGesamt += rMouseY * e/10;
+  xOveralOffset += rMouseX * e/10;
+  yOveralOffset += rMouseY * e/10;
 }
 void mouseDragged() {
   if (locked) {
     xOffset = (mouseX - xPressed);
     yOffset = (mouseY - yPressed);
-    xOffsetGesamt += xOffset;
-    yOffsetGesamt += yOffset;
+    xOveralOffset += xOffset;
+    yOveralOffset += yOffset;
     xPressed = mouseX;
     yPressed = mouseY;
     cursor(MOVE);
@@ -99,9 +99,9 @@ void keyPressed() {
     b  = 1;
   }
   if (key ==' ') {
-    skalierungsfaktor = 1;
-    xOffsetGesamt = 0;
-    yOffsetGesamt = 0;
+    scaling = 1;
+    xOveralOffset = 0;
+    yOveralOffset = 0;
   }
 }
 void mousePressed() {
@@ -148,7 +148,7 @@ boolean fileExists(String path) {
 
 ////////////////////////////      TODO       /////////////////////
 /*
-- wachsen optimieren
+- grow optimieren
  - moegliche Fehler koennen beim Kopieren der Connections auftreten (falsche Referenzen, etc...)
  - Farben werden nach einiger Zeit grau
  - Fitness noch nicht vollstaendig implementiert --> muss noch Auswirkung auf die Paarung haben

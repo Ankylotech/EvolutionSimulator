@@ -64,7 +64,7 @@ class Matrix {
   void sigmoid() {
     for (int x = 0; x < rows; x++) {
       for (int y = 0; y < cols; y++) {
-        m[x][y] = AktivierungsFunktion.sigmoid(m[x][y]);
+        m[x][y] = Functions.sigmoid(m[x][y]);
       }
     }
   }

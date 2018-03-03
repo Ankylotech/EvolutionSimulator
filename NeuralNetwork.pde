@@ -122,13 +122,13 @@ public class NeuralNetwork {
 
   //// getter
   // InputNeuronen, setzt voraus dass so viele Neuronen generiert wurden, wie es hier Werte gibt
-  public void setInputNGeschwindigkeit(float v) {
+  public void setInputNvelocity(float v) {
     inputSchicht.set(0, 0, v);
   }
-  public void setInputNEnergie(float v) {
+  public void setInputNEnergy(float v) {
     inputSchicht.set(1, 0, v);
   }
-  public void setInputNFeldart(float v) {
+  public void setInputNTileType(float v) {
     inputSchicht.set(2, 0, v);
   }
   public void setInputNMemory(float v) {
@@ -137,37 +137,37 @@ public class NeuralNetwork {
   public void setInputNBias(float v) {
     inputSchicht.set(4, 0, v);
   }
-  public void setInputNRichtung(float v) {
+  public void setInputNHeading(float v) {
     inputSchicht.set(5, 0, v);
   }
-  ////Fuehler
+  ////Sensor
 
-  public void setInputNFuehlerRichtung(float v, int i) {
+  public void setInputNSensorHeading(float v, int i) {
     inputSchicht.set(6 + (i*5), 0, v);
   }
-  public void setInputNFuehlerGegnerEnergie(float v, int i) {
+  public void setInputNSensorEnemyEnergy(float v, int i) {
     inputSchicht.set(7+ (i*5), 0, v);
   }
-  public void setInputNFuehlerFeldEnergie(float v, int i) {
+  public void setInputNSensorTileEnergy(float v, int i) {
     inputSchicht.set(8+ (i*5), 0, v);
   }
-  public void setInputNFuehlerFeldArt(float v, int i) {
+  public void setInputNSensorTileType(float v, int i) {
     inputSchicht.set(9 + (i*5), 0, v);
   }
-  public void setInputNFuehlerGenDiff(float v, int i) {
+  public void setInputNSensorGenDiff(float v, int i) {
     inputSchicht.set(10 + (i*5), 0, v);
   }
 
   // OutputNeuronen
-  public float getGeschwindigkeit(Lebewesen lw) {
-    return outputSchicht.get(0, 0) * lw.getMaxGeschwindigkeit();
+  public float getvelocity(Animal lw) {
+    return outputSchicht.get(0, 0) * lw.getmaxVelocity();
   }
   public float getRotation() {
     float rotation; // muss noch sehen, wie die Rotation wirklich laeuft
     if (outputSchicht.get(1, 0) < 0.475) {
-      rotation = map(sq(outputSchicht.get(1, 0)), 0, 0.225625, -Lebewesen.maxRotationswinkelBewegung/2, 0);
+      rotation = map(sq(outputSchicht.get(1, 0)), 0, 0.225625, -Animal.maxRotationAngle/2, 0);
     } else if (outputSchicht.get(1, 0) > 0.525) {
-      rotation = map(sq(outputSchicht.get(1, 0)), 0.275625, 1, 0, Lebewesen.maxRotationswinkelBewegung/2);
+      rotation = map(sq(outputSchicht.get(1, 0)), 0.275625, 1, 0, Animal.maxRotationAngle/2);
     } else rotation = 0;
     return rotation;
   }
@@ -188,10 +188,10 @@ public class NeuralNetwork {
     return outputSchicht.get(5, 0);
   }
 
-  // Fuehler
+  // Sensor
 
-  public float getRotationFuehler(int i) {
-    return map(outputSchicht.get(6+i, 0), 0, 1, -Lebewesen.maxRotationswinkelFuehler/2, Lebewesen.maxRotationswinkelFuehler/2);
+  public float getRotationSensor(int i) {
+    return map(outputSchicht.get(6+i, 0), 0, 1, -Animal.maxRotationAngleSensor/2, Animal.maxRotationAngleSensor/2);
   }
 
   // andere getter

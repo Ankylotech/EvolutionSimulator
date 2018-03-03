@@ -21,16 +21,16 @@ class Plot { //<>//
 
   void show() {
 
-    posX = map.weltX + X/skalierungsfaktor;
-    posY = map.weltY + Y/skalierungsfaktor;
+    posX = map.WorldX + X/scaling;
+    posY = map.WorldY + Y/scaling;
 
-    pWidth = (W)/skalierungsfaktor;
-    pHeight = (H)/skalierungsfaktor;
+    pWidth = (W)/scaling;
+    pHeight = (H)/scaling;
 
     fill(255, 200);
     rect(posX, posY, pWidth, pHeight);
     stroke(0);
-    strokeWeight(1/skalierungsfaktor);
+    strokeWeight(1/scaling);
 
     line(posX+1, posY, posX+1, posY+pHeight);
     line(posX+1, posY+pHeight-1, posX+pWidth, posY+pHeight-1);

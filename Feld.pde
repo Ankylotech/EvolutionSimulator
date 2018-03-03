@@ -1,132 +1,131 @@
-class Feld {
+class Tile {
 
 
-  final public static float maxEnergiewertAllgemein = 20;
+  final public static float maxOverallEnergy = 20;
   private float posX, posY;
-  private float nHoehe; //noise-Hoehe
-  private float regenerationsrate;
-  private float energiewert = 0;
-  private float maxEnergiewert;
-  private float feldBreite;
-  private float maxRegenerationsrate = maxEnergiewertAllgemein/140;
-  private float[] bewachsen;
-  private boolean beeinflussbar;
+  private float nHeight; //noise-Height
+  private float regenerationRate;
+  private float energyValue = 0;
+  private float maxEnergyValue;
+  private float TileWidth;
+  private float maxregenerationRate = maxOverallEnergy/140;
+  private float[] influence;
+  private boolean influenceable;
 
   private int arrayPosX;
   private int arrayPosY;
 
 
 
-  private int meeresspiegel = 42;
+  private int sealevel = 50;
 
-  Feld(float x, float y, float h, float fB, int aX, int aY) {
+ Tile(float x, float y, float h, float fB, int aX, int aY) {
     posX = x;
     posY = y;
-    nHoehe = h;
-    feldBreite = fB;
+    nHeight = h;
+    TileWidth = fB;
     arrayPosX = aX;
     arrayPosY = aY;
-    bewachsen = new float[4];
+    influence = new float[4];
 
     if (this.isLand()) {
-      maxEnergiewert = maxEnergiewertAllgemein;
-      beeinflussbar = true;
+      maxEnergyValue = maxOverallEnergy;
+      influenceable = true;
     } else {
-      maxRegenerationsrate = 0;
-      maxEnergiewert = 0;
-      beeinflussbar = false;
+      maxregenerationRate = 0;
+      maxEnergyValue = 0;
+      influenceable = false;
     }
   }
 
-  public void wachsen() { 
-
-    if (beeinflussbar) {
-      float rest = maxRegenerationsrate - regenerationsrate;
-      bewachsen = sort(bewachsen);
+  public void grow() { 
+    if (influenceable) {
+      float rest = maxregenerationRate - regenerationRate;
+      influence = sort(influence);
       for (int i = 3; i >= 0; i--) { 
-        if (bewachsen[i] > random(0.5, 0.9)) {
-          regenerationsrate += bewachsen[i] * rest;
+        if (influence[i] > random(0.5, 0.9)) {
+          regenerationRate += influence[i] * rest;
         }
-        rest = maxRegenerationsrate - regenerationsrate;
+        rest = maxregenerationRate - regenerationRate;
       }
     }
 
-    regenerationsrate *= meeresspiegel+20/nHoehe;
-    if (regenerationsrate>maxRegenerationsrate)regenerationsrate = maxRegenerationsrate;
+    regenerationRate *= sealevel+20/nHeight;
+    if (regenerationRate>maxregenerationRate)regenerationRate = maxregenerationRate;
 
-    energiewert += regenerationsrate;
-    if (energiewert > maxEnergiewert)energiewert = maxEnergiewert;
+    energyValue += regenerationRate;
+    if (energyValue > maxEnergyValue)energyValue = maxEnergyValue;
   }
 
   public boolean isLand() {
-    if (nHoehe>meeresspiegel) {
+    if (nHeight>sealevel) {
       return true;
     } else return false;
   }
   public int isLandInt() {
-    if (nHoehe>meeresspiegel) {
+    if (nHeight>sealevel) {
       return 1;
     } else return 0;
   }
 
-  public void drawFeld() {
-    if (nHoehe>meeresspiegel) {
-      fill(map(energiewert, 0, maxEnergiewert, 255, 80), map(energiewert, 0, maxEnergiewert, 210, 140), 20); //muss noch geändert werden
-    } else fill(0, 0, map(nHoehe, 0, 45, 0, 140));
-    rect(posX, posY, feldBreite, feldBreite);
+  public void drawTile() {
+    if (nHeight>sealevel) {
+      fill(map(energyValue, 0, maxEnergyValue, 255, 80), map(energyValue, 0, maxEnergyValue, 210, 140), 20); //muss noch geändert werden
+    } else fill(0, 0, map(nHeight, 0, 45, 0, 140));
+    rect(posX, posY,TileWidth,TileWidth);
   }
 
-  public void setEnergie(int x) {
-    energiewert = x;
+  public void setEnergy(int x) {
+    energyValue = x;
   }
 
   // getter(bisher)
-  public float getEnergie() {
-    return energiewert;
+  public float getEnergy() {
+    return energyValue;
   }
 
-  public float getMaxEnergie() {
-    return maxEnergiewert;
+  public float getMaxEnergy() {
+    return maxEnergyValue;
   }
 
-  public float getBewachsen() {
-    return energiewert/maxEnergiewertAllgemein;
+  public float getinfluence() {
+    return energyValue/maxOverallEnergy;
   }
-  public void vonWasserBeeinflussen() {
-    boolean wasser = false;
-    if (arrayPosX > 0 && !wasser) wasser = !map.getFeldInArray(arrayPosX-1, arrayPosY).isLand();
-    if (arrayPosY > 0 && !wasser) wasser = !map.getFeldInArray(arrayPosX, arrayPosY-1).isLand();
-    if (arrayPosX < weltGroesse -1 && !wasser) wasser = !map.getFeldInArray(arrayPosX+1, arrayPosY).isLand();
-    if (arrayPosY < weltGroesse -1 && !wasser) wasser = !map.getFeldInArray(arrayPosX, arrayPosY+1).isLand();
-    if (wasser) {
-      regenerationsrate = maxRegenerationsrate;
-      beeinflussbar = false;
+  public void influenceByWater() {
+    boolean water = false;
+    if (arrayPosX > 0 && !water) water = !map.getTileInArray(arrayPosX-1, arrayPosY).isLand();
+    if (arrayPosY > 0 && !water) water = !map.getTileInArray(arrayPosX, arrayPosY-1).isLand();
+    if (arrayPosX < worldSize -1 && !water) water = !map.getTileInArray(arrayPosX+1, arrayPosY).isLand();
+    if (arrayPosY < worldSize -1 && !water) water = !map.getTileInArray(arrayPosX, arrayPosY+1).isLand();
+    if (water) {
+      regenerationRate = maxregenerationRate;
+      influenceable = false;
     }
   }
 
-  public void nachbarnBeeinflussen() {
+  public void influenceNeighbors() {
     if (arrayPosX > 0) {
-      Feld f = map.getFeldInArray(arrayPosX-1, arrayPosY);
-      if (f.beeinflussbar) {
-        f.bewachsen[0] = getBewachsen();
+     Tile f = map.getTileInArray(arrayPosX-1, arrayPosY);
+      if (f.influenceable) {
+        f.influence[0] = getinfluence();
       }
     };
     if (arrayPosY > 0) {
-      Feld f = map.getFeldInArray(arrayPosX, arrayPosY-1);
-      if (f.beeinflussbar) {
-        f.bewachsen[1] = getBewachsen();
+     Tile f = map.getTileInArray(arrayPosX, arrayPosY-1);
+      if (f.influenceable) {
+        f.influence[1] = getinfluence();
       }
     };
-    if (arrayPosX < weltGroesse -1) {
-      Feld f = map.getFeldInArray(arrayPosX+1, arrayPosY);
-      if (f.beeinflussbar) {
-        f.bewachsen[2] = getBewachsen();
+    if (arrayPosX < worldSize -1) {
+     Tile f = map.getTileInArray(arrayPosX+1, arrayPosY);
+      if (f.influenceable) {
+        f.influence[2] = getinfluence();
       }
     };
-    if (arrayPosY < weltGroesse -1) {
-      Feld f = map.getFeldInArray(arrayPosX, arrayPosY+1);
-      if (f.beeinflussbar) {
-        f.bewachsen[3] = getBewachsen();
+    if (arrayPosY < worldSize -1) {
+     Tile f = map.getTileInArray(arrayPosX, arrayPosY+1);
+      if (f.influenceable) {
+        f.influence[3] = getinfluence();
       }
     };
   }

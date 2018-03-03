@@ -1,11 +1,11 @@
-public class Welt {
+public class World {
 
-  private Feld[][] welt;
-  private ArrayList<Lebewesen> bewohner;
-  private ArrayList<Feld> land;
+  private Tile[][] World;
+  private ArrayList<Animal> bewohner;
+  private ArrayList<Tile> land;
   private int lwZahl;
-  private float weltX;
-  private float weltY;
+  private float WorldX;
+  private float WorldY;
   private double jahr;
   private float spacing;
   private float fB;
@@ -29,18 +29,18 @@ public class Welt {
 
 
   // Tiere: Standard Werte
-  final public static float stdFressrate = 20;
-  final public static float stdMaxGeschwindigkeit = 2;
+  final public static float stdFeedingRate = 20;
+  final public static float stdmaxVelocity = 2;
   final public static float stdAngriffswert = 20;
-  final public static float stdReproduktionswartezeit = 0.25;
-  float stdDurchmesser;
+  final public static float stdReproduktionswTypeezeit = 0.25;
+  float stddiameter;
 
 
-  public Welt(int weltG, int lw) {
+  public World(int WorldG, int lw) {
 
     jahr = 0;
     lwZahl = lw;
-    weltGroesse = weltG;
+    worldSize = WorldG;
     //plots
     fitness = new Plot(0, 150, 200, 200);
     altersschnitt = new Plot(0, 150, 200, 200);
@@ -56,52 +56,52 @@ public class Welt {
     keiner = new Button(100, 100, 100, 50, "kein Graph");
 
 
-    // skaliert die Feldbreite and die Fenstergroesse und die Feldanzahl pro Reihe
-    fB = fensterGroesse/weltGroesse;
-    stdDurchmesser = fB ;
+    // skaliert dieTileWidth and die screenSize und dieTileanzahl pro Reihe
+    fB = screenSize/worldSize;
+    stddiameter = fB ;
 
-    // generiert Welt
-    welt = new Feld[weltGroesse][weltGroesse];
+    // generiert World
+    World = new Tile[worldSize][worldSize];
     float yNoise = 0.0;
-    for (int y=0; y<weltGroesse; y++) {
+    for (int y=0; y<worldSize; y++) {
       float xNoise = 0.0;
-      for (int x=0; x<weltGroesse; x++) {
-        welt[x][y] = new Feld(x*fB, y*fB, noise(xNoise, yNoise)*100, fB, x, y);
+      for (int x=0; x<worldSize; x++) {
+        World[x][y] = new Tile(x*fB, y*fB, noise(xNoise, yNoise)*100, fB, x, y);
         xNoise += 0.038;
       }
       yNoise += 0.038;
     }
-    land = new ArrayList<Feld>();
+    land = new ArrayList<Tile>();
 
-    for (int i = 0; i<weltGroesse; i++) {
-      for (Feld f : welt[i]) {
+    for (int i = 0; i<worldSize; i++) {
+      for (Tile f : World[i]) {
         if (f.isLand()) {
           land.add(f);
         }
       }
     }
 
-    // generiert Anfangs-Lebewesen
-    bewohner = new ArrayList<Lebewesen>(lw);
+    // generiert Anfangs-Animal
+    bewohner = new ArrayList<Animal>(lw);
     for (int i=0; i<lw; i++) {
       int posX;
       int posY;
       do {
-        //println("\n\ngeneriere Lebewesen");
-        posX = (int)random(0, fensterGroesse);
-        posY = (int)random(0, fensterGroesse);
-      } while (!this.getFeld(posX, posY).isLand());
+        //println("\n\ngeneriere Animal");
+        posX = (int)random(0, screenSize);
+        posY = (int)random(0, screenSize);
+      } while (!this.getTile(posX, posY).isLand());
 
-      bewohner.add(new Lebewesen(posX, posY, fB, currentID));
+      bewohner.add(new Animal(posX, posY, fB, currentID));
       currentID++;
     }
   }
 
   // entfernt Tote
   public void todUndGeburt() {
-    ArrayList<Lebewesen> bewohnerCopy = new ArrayList<Lebewesen>(bewohner);
-    for (Lebewesen lw1 : bewohnerCopy) {
-      for (Lebewesen lw2 : bewohnerCopy) {
+    ArrayList<Animal> bewohnerCopy = new ArrayList<Animal>(bewohner);
+    for (Animal lw1 : bewohnerCopy) {
+      for (Animal lw2 : bewohnerCopy) {
         if (!lw1.equals(lw2) && lw1.collision(lw2)) {
           this.gebaeren(lw1, lw2);
         }
@@ -109,32 +109,32 @@ public class Welt {
     }
   }
 
-  public float entfernungLebewesen(Lebewesen lw1, Lebewesen lw2) {
+  public float entfernungAnimal(Animal lw1, Animal lw2) {
     return lw1.getPosition().dist(lw2.getPosition());
   }
 
-  public void gebaeren(Lebewesen lw1, Lebewesen lw2) {
+  public void gebaeren(Animal lw1, Animal lw2) {
     if (
       (lw1.NN.getGeburtwille()>lw1.reproduktionsschwellwert && lw2.NN.getGeburtwille()>lw2.reproduktionsschwellwert)
       &&
-      (lw1.getEnergie() >= Lebewesen.geburtsenergie && lw2.getEnergie() >= Lebewesen.geburtsenergie) // Beide LW muessen genug Energie haben
+      (lw1.getEnergy() >= Animal.geburtsEnergy && lw2.getEnergy() >= Animal.geburtsEnergy) // Beide LW muessen genug Energy haben
       &&
       (lw1.isGeburtsbereit() && lw2.isGeburtsbereit()) // Beide LW muessen geburtsbereit sein
       )
     {
-      // benötigte Geburtsenergie wird abgezogen
-      lw1.addEnergie(-Lebewesen.geburtsenergie);
-      lw2.addEnergie(-Lebewesen.geburtsenergie);
+      // benötigte GeburtsEnergy wird abgezogen
+      lw1.addEnergy(-Animal.geburtsEnergy);
+      lw2.addEnergy(-Animal.geburtsEnergy);
 
       // Dummy-Vectoren
       PVector posLw1 = new PVector(lw1.getPosition().x, lw1.getPosition().y);
       PVector posLw2 = new PVector(lw2.getPosition().x, lw2.getPosition().y);
       geburten++;
       println("geburt" + geburten);
-      // Neues Lebewesen mit gemischten Connections entsteht
-      this.addLebewesen(
-        new Lebewesen((int)(posLw1.x + cos(PVector.angleBetween(posLw1, posLw2))*(lw1.getDurchmesser()/2)), 
-        (int)(posLw1.y + sin(PVector.angleBetween(posLw1, posLw2))*(lw1.getDurchmesser()/2)), 
+      // Neues Animal mit gemischten Connections entsteht
+      this.addAnimal(
+        new Animal((int)(posLw1.x + cos(PVector.angleBetween(posLw1, posLw2))*(lw1.getDiameter()/2)), 
+        (int)(posLw1.y + sin(PVector.angleBetween(posLw1, posLw2))*(lw1.getDiameter()/2)), 
         lw1.NN.getConnections1(), 
         lw1.NN.getConnections2(), 
         lw1.NN.getConnections3(), 
@@ -152,27 +152,27 @@ public class Welt {
         lw1.getFellfarbe(), 
         lw2.getFellfarbe(), 
         max(lw1.getGeneration(), lw2.getGeneration()), 
-        lw1.getFressrate(), 
-        lw1.getMaxGeschwindigkeit(), 
-        lw1.getReproduktionswartezeit(), 
+        lw1.getfeedingRate(), 
+        lw1.getmaxVelocity(), 
+        lw1.getReproduktionswTypeezeit(), 
         lw1.getAngriffswert(), 
 
-        lw2.getFressrate(), 
-        lw2.getMaxGeschwindigkeit(), 
-        lw2.getReproduktionswartezeit(), 
+        lw2.getfeedingRate(), 
+        lw2.getmaxVelocity(), 
+        lw2.getReproduktionswTypeezeit(), 
         lw2.getAngriffswert(), 
 
         currentID, 
 
-        chooseRandom(lw1.praeferenzFressrate, lw2.praeferenzFressrate), 
-        chooseRandom(lw1.praeferenzMaxGeschwindigkeit, lw2.praeferenzMaxGeschwindigkeit), 
+        chooseRandom(lw1.praeferenzfeedingRate, lw2.praeferenzfeedingRate), 
+        chooseRandom(lw1.praeferenzmaxVelocity, lw2.praeferenzmaxVelocity), 
         chooseRandom(lw1.praeferenzAngriffswert, lw2.praeferenzAngriffswert), 
-        chooseRandom(lw1.praeferenzReproduktionswartezeit, lw2.praeferenzReproduktionswartezeit), 
+        chooseRandom(lw1.praeferenzReproduktionswTypeezeit, lw2.praeferenzReproduktionswTypeezeit), 
 
-        chooseRandom(lw1.fressratenAnteil, lw2.fressratenAnteil), 
+        chooseRandom(lw1.feedingRatenAnteil, lw2.feedingRatenAnteil), 
         chooseRandom(lw1.maxGeschwAnteil, lw2.maxGeschwAnteil), 
         chooseRandom(lw1.angriffsAnteil, lw2.angriffsAnteil), 
-        chooseRandom(lw1.repwarteAnteil, lw2.repwarteAnteil)
+        chooseRandom(lw1.repwTypeeAnteil, lw2.repwTypeeAnteil)
 
         ));
       currentID++;
@@ -185,24 +185,24 @@ public class Welt {
 
   // update Methode wird immer in draw (Mainloop) gerufen
   public void update() {
-    translate(xOffsetGesamt+xOffset, yOffsetGesamt+yOffset);
-    scale(skalierungsfaktor);
+    translate(xOveralOffset+xOffset, yOveralOffset+yOffset);
+    scale(scaling);
     background(0, 128, 255);
-    weltX = (0-xOffsetGesamt-xOffset)/skalierungsfaktor;
-    weltY = (0-yOffsetGesamt-yOffset)/skalierungsfaktor;
-    spacing = 20/skalierungsfaktor;
+    WorldX = (0-xOveralOffset-xOffset)/scaling;
+    WorldY = (0-yOveralOffset-yOffset)/scaling;
+    spacing = 20/scaling;
     int bewohnerZahl = bewohner.size();
     if (bewohnerZahl < lwZahl) {
       for (int i=0; i<lwZahl-bewohnerZahl; i++) {
         int posX;
         int posY;
         do {
-          //println("\n\nfehlende Lebewesen werden hizugefügt");
-          posX = (int)random(0, fensterGroesse);
-          posY = (int)random(0, fensterGroesse);
-        } while (!this.getFeld(posX, posY).isLand());
+          //println("\n\nfehlende Animal werden hizugefügt");
+          posX = (int)random(0, screenSize);
+          posY = (int)random(0, screenSize);
+        } while (!this.getTile(posX, posY).isLand());
 
-        bewohner.add(new Lebewesen(posX, posY, fB, currentID));
+        bewohner.add(new Animal(posX, posY, fB, currentID));
         currentID++;
       }
     }
@@ -211,17 +211,17 @@ public class Welt {
     gesamtFitness = 0;
 
     for (int i = bewohner.size()-1; i>=0; i--) {
-      Lebewesen lw = bewohner.get(i);
+      Animal lw = bewohner.get(i);
       lw.input();
       lw.NN.update();
       lw.leben();
       lw.altern();
-      lw.bewegen(lw.NN.getGeschwindigkeit(lw), lw.NN.getRotation());
+      lw.bewegen(lw.NN.getvelocity(lw), lw.NN.getRotation());
       lw.fressen(lw.NN.getFresswille());
       lw.erinnern(lw.NN.getMemory());
       //lw.fellfarbeAendern(lw.NN.getFellRot(), lw.NN.getFellGruen(), lw.NN.getFellBlau());
-      for (int j = 0; j < lw.fuehlerZahl; j++) {
-        lw.fuehlerRotieren(lw.NN.getRotationFuehler(j)+  lw.NN.getRotation(), j);
+      for (int j = 0; j < lw.SensorZahl; j++) {
+        lw.rotateSensor(lw.NN.getRotationSensor(j)+  lw.NN.getRotation(), j);
       }
       lw.angriff(lw.NN.getAngriffswille()); // hilft, Bevoelkerung nicht zu gross zu halten
 
@@ -236,10 +236,10 @@ public class Welt {
     todUndGeburt();
 
     if (frameCount > 1) {
-      felderBewachsen();
+     Tileerinfluence();
     } else {
-      for (Feld f : land) {
-        f.vonWasserBeeinflussen();
+      for (Tile f : land) {
+        f.influenceByWater();
       }
     }
 
@@ -251,7 +251,7 @@ public class Welt {
       if ((jahr*100)%1 == 0) {
         double aeltestesLwAlter = 0;
         int aeltestesLwID = 0; // 0 ist Dummywert
-        for (Lebewesen lw : bewohner) {
+        for (Animal lw : bewohner) {
           if (lw.getAlter() > aeltestesLwAlter) {
             aeltestesLwAlter = lw.getAlter();
             aeltestesLwID = lw.getID();
@@ -277,15 +277,15 @@ public class Welt {
       }
     }
 
-    showWelt();
-    showLebewesen();
+    showWorld();
+    showAnimal();
     showInterface();
     if (graph == "fitness")fitness.show();
     if (graph == "aeltestes")aeltestes.show();
     if (graph == "schnitt")altersschnitt.show();
   }
-  // Lebewesen hinzufügen
-  public void addLebewesen(Lebewesen lw) {
+  // Animal hinzufügen
+  public void addAnimal(Animal lw) {
     bewohner.add(lw);
   }
 
@@ -294,14 +294,14 @@ public class Welt {
 
     String jahre = "Jahre: " + jahr;
     fill(50, 200);
-    rect(weltX, weltY, 200/skalierungsfaktor, 150/skalierungsfaktor);
+    rect(WorldX, WorldY, 200/scaling, 150/scaling);
 
     fill(255);
-    textSize(17/skalierungsfaktor);
+    textSize(17/scaling);
     textAlign(LEFT);
-    text(jahre, weltX + spacing, weltY + spacing);
+    text(jahre, WorldX + spacing, WorldY + spacing);
 
-    text("Bewohner: " + bewohner.size(), weltX + spacing, weltY + spacing*2);
+    text("Bewohner: " + bewohner.size(), WorldX + spacing, WorldY + spacing*2);
 
     bFitness.show();
     bAltersschnitt.show();
@@ -309,75 +309,75 @@ public class Welt {
     keiner.show();
   }
 
-  // zeichnet die Welt
-  public void showWelt() {
-    for (int x=0; x<weltGroesse; x++) {
-      for (Feld a : welt[x]) {
-        a.drawFeld();
+  // zeichnet die World
+  public void showWorld() {
+    for (int x=0; x<worldSize; x++) {
+      for (Tile a : World[x]) {
+        a.drawTile();
       }
     }
   }
-  public void showLebewesen() {
+  public void showAnimal() {
     stroke(1);
     strokeWeight(0.2);
-    for (Lebewesen lw : bewohner) {
-      lw.drawLebewesen();
+    for (Animal lw : bewohner) {
+      lw.drawAnimal();
     }
     noStroke();
   }
-  // zeichnet ein Array aus Lebewesen (meistens am Anfang genutzt) // ka ob mans noch braucht, ich lass es einfach mal drinnen
-  public void showLebewesen(Lebewesen[] lwArray) {
+  // zeichnet ein Array aus Animal (meistens am Anfang genutzt) // ka ob mans noch braucht, ich lass es einfach mal drinnen
+  public void showAnimal(Animal[] lwArray) {
     stroke(1);
     strokeWeight(0.2);
-    for (Lebewesen lw : lwArray) {
-      lw.drawLebewesen();
+    for (Animal lw : lwArray) {
+      lw.drawAnimal();
     }
     noStroke();
   }
 
-  // zeichnet ein einziges Lebewesen (eig. unnötig, aber um die Form zu wahren sollte man diese Methode nutzen)
-  public void showLebewesen(Lebewesen lw) {
+  // zeichnet ein einziges Animal (eig. unnötig, aber um die Form zu wahren sollte man diese Methode nutzen)
+  public void showAnimal(Animal lw) {
     stroke(1);
     strokeWeight(0.2);
-    lw.drawLebewesen();
+    lw.drawAnimal();
     noStroke();
   }
 
-  public void felderBewachsen() {
-    for (Feld f : land) {
-      f.nachbarnBeeinflussen();
+  public void Tileerinfluence() {
+    for (Tile f : land) {
+      f.influenceNeighbors();
     }
-    for (Feld f : land) {
-      f.wachsen();
+    for (Tile f : land) {
+      f.grow();
     }
   }
 
   //// Getter
-  public Lebewesen[] getLebewesen() {
-    return bewohner.toArray(new Lebewesen[bewohner.size()]);
+  public Animal[] getAnimal() {
+    return bewohner.toArray(new Animal[bewohner.size()]);
   }
 
-  public int getWeltGroesse() {
-    return weltGroesse;
+  public int getworldSize() {
+    return worldSize;
   }
 
-  public Feld getFeld(int x, int y) { // funktioniert nur bei schönen Zahle, muss noch besser werden (1000, 100, etc)
-    float xFeld = (x - (x % fB)) / fB;
-    float yFeld = (y - (y % fB)) / fB;
-    if (xFeld >= weltGroesse) {
-      xFeld = 0;
+  public Tile getTile(int x, int y) { // funktioniert nur bei schönen Zahle, muss noch besser werden (1000, 100, etc)
+    float xTile = (x - (x % fB)) / fB;
+    float yTile = (y - (y % fB)) / fB;
+    if (xTile >= worldSize) {
+      xTile = 0;
     }
-    if (yFeld >= weltGroesse) {
-      yFeld = 0;
+    if (yTile >= worldSize) {
+      yTile = 0;
     }
-    //println("x: " + x + " xFeld: " + xFeld + "         y: " + y + " yFeld: " + yFeld);
-    return welt[(int)xFeld][(int)yFeld];
+    //println("x: " + x + " xTile: " + xTile + "         y: " + y + " yTile: " + yTile);
+    return World[(int)xTile][(int)yTile];
   }
 
-  public Feld getFeldInArray(int x, int y) {
+  public Tile getTileInArray(int x, int y) {
     try {
-      if (x != -1 && x != weltGroesse && y != -1 && y != weltGroesse) { // um die ArrayIndexOutOfBoundsException zu umgehen, die normalerweise auftreten würde // try-catch Block ist trotzdem zur sicherheit da
-        return welt[x][y];
+      if (x != -1 && x != worldSize && y != -1 && y != worldSize) { // um die ArrayIndexOutOfBoundsException zu umgehen, die normalerweise auftreten würde // try-catch Block ist trotzdem zur sicherheit da
+        return World[x][y];
       } else return null;
     } 
     catch(Exception e) {
@@ -386,9 +386,9 @@ public class Welt {
     }
   }
 
-  public Lebewesen getTier(int x, int y) {
-    for (Lebewesen lw : bewohner) {
-      if (sqrt(sq(lw.position.x- x) + sq(lw.position.y- y)) < lw.durchmesser/2) {
+  public Animal getTier(int x, int y) {
+    for (Animal lw : bewohner) {
+      if (sqrt(sq(lw.position.x- x) + sq(lw.position.y- y)) < lw.diameter/2) {
         return lw;
       }
     }
@@ -409,7 +409,7 @@ public class Welt {
   public int getZeitMultiplikator() {
     return multiplikator;
   }
-  public float getFeldbreite() {
+  public float getTileWidth() {
     return fB;
   }
   public float getDurchschnittsFitness() { // funktioniert nur bei Standardfitness
