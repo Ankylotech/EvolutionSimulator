@@ -1,37 +1,79 @@
-PrintWriter output1;
-PrintWriter output2;
-PrintWriter output3;
-PrintWriter output4;
-PrintWriter output5;
+import grafica.*;
 
-int b =1;
-// screenSize muss seperat geändert werden, sollte immer gleich sein & einen schönen Wert haben, z.B. 100, 500,...
-final int screenSize = 1000;
-private int worldSize;
-private float scaling;
-private float xOffset = 0.0;
-private float yOffset = 0.0;
-private float xOveralOffset = 0.0;
-private float yOveralOffset = 0.0;
-private float xPressed, yPressed;
-private boolean locked = false;
+//// Verschiedene Buttonarten
+
+//    ! Reihenfolge darf nicht verändert werden !    //
+enum ButtonType {FITNESS, AVGAGE, OLDEST, FLOOD, GENERATION,SAVE};
+
+//// Outputs zum speichern der Daten
+
+PrintWriter outputOldestAge;
+PrintWriter outputAverageAge;
+PrintWriter outputAverageFitness;
+PrintWriter outputDeathsAndBirths;
+PrintWriter outputPopulationSize;
+// Momentane Dateinummer: z.B. 532 -> durchschnittsFitnessLw532.txt
+// wird unten aus saveDataIndex.dat ausgelesen
 int fileNumber;
+// bestimmt, ob die Daten gespeichert werden
+boolean save = true;
 
-boolean save;
+//// Weltvariablen
+// speichert die momentane Skalierung, offset, etc.
 
+// fenstergroesse muss seperat geändert werden, sollte immer gleich sein & einen schönen Wert haben, z.B. 100, 500,...
+final int windowSize = 1000;
+int worldSize;
+float scale = 1;
+float xOffset = 0.0;
+float yOffset = 0.0;
+float xOffsetTotal = 0.0;
+float yOffsetTotal = 0.0;
+float xPressed, yPressed;
+
+//// Interface
+
+// neues Fenster
+PApplet iface;
+// Plot und zugehörige Daten
+GPlot plot;
+
+int plotX = 0;
+int plotY = 0;
+int plotWidth = 250;
+int plotHeight = 250;
+float[] margin = new float[] {30,30,10,10};
+
+ButtonType selectedButton = ButtonType.FITNESS;
+
+//// restliche globale Variablen
+// ID System
 int currentID = 0;
+// Kreaturen können mit GODMODE per Hand hinzugefügt werden
+boolean godmode = false;
+// wenn Maus gedrückt, dann locked wahr
+boolean locked = false;
 
+
+//// Welt
 public World map;
 
+void settings() {
+  size(1000, 1000);
+}
+
 void setup() {
-  fullScreen();
-  map = new World(200, 200);
-  noStroke();
-  scaling = 1;
+  // Einstellungen
   frameRate(50);
-
-  save = true;
-
+  noStroke();
+  
+  // Welt erstellt
+  map = new World(50, 100); // Darf nicht 10 sein, sonst hängt sich die Simulation auf (??????)
+  
+  // Interface (neuesFenster) erstellt
+  iface = new Interface();
+  
+  // saveDataIndex erhöht, Dateien & Writer erstellt
   if (save) {
     if (!fileExists(sketchPath("saveDataIndex.dat"))) {
       fileNumber = 1;
@@ -42,82 +84,89 @@ void setup() {
       saveBytes("saveDataIndex.dat", intToBytes(fileNumber));
     }
 
-    output1 = createWriter("./data/ältestesLw/ältestesLw"+fileNumber+".txt");
-    output2 = createWriter("./data/durchschnittsLw/durchschnittsLw"+fileNumber+".txt");
-    output3 = createWriter("./data/durchschnittsFitnessLw/durchschnittsFitnessLw"+fileNumber+".txt");
-    output4 = createWriter("./data/todeUndGeburtenLw/todeUndGeburtenLw"+fileNumber+".txt");
-    output5 = createWriter("./data/population/population"+fileNumber+".txt");
+    outputOldestAge = createWriter("./data/ältestesLw/ältestesLw"+fileNumber+".txt");
+    outputAverageAge = createWriter("./data/durchschnittsLw/durchschnittsLw"+fileNumber+".txt");
+    outputAverageFitness = createWriter("./data/durchschnittsFitnessLw/durchschnittsFitnessLw"+fileNumber+".txt");
+    outputDeathsAndBirths = createWriter("./data/todeUndGeburtenLw/todeUndGeburtenLw"+fileNumber+".txt");
+    outputPopulationSize = createWriter("./data/population/population"+fileNumber+".txt");
   }
-
-
-
+  
+  // Welt & Kreaturen werden angezeigt
   map.showWorld();
-  map.showAnimal(map.getAnimal());
+  map.showCreature(map.getCreatures());
+  
+  map.loadWorld("./data");
 }
 
+// Mainloop
 void draw() {
-  //try {
-    for (int i=0; i<b; i++) {
-      map.update();
-    }
-  //}
-  //catch(Exception e) {
-  //  e.printStackTrace();
-  //}
+  map.update();
 }
 
 // Eventhandler
 void mouseWheel(MouseEvent event) {
   float e = event.getCount();
-
-  scaling -= e / 10;
-  if (scaling<=0) {
-    scaling = e/10;
+  
+  // Grenzwerte der Scale werden überprüft
+  scale -= (e / 10)*scale;
+  if (scale < 0.01) {
+    scale = 0.01;
   }
-  float rMouseX = (mouseX-(xOveralOffset))/scaling;
-  float rMouseY = (mouseY-(yOveralOffset))/scaling;
+  if (scale > 10) {
+    scale = 10;
+  }
+  
+  // zoom auf Mauszeiger
+  if (!(scale <= 0.01 || scale >= 10)) {
+    float rMouseX = (mouseX-(xOffsetTotal))/scale;
+    float rMouseY = (mouseY-(yOffsetTotal))/scale;
 
-  xOveralOffset += rMouseX * e/10;
-  yOveralOffset += rMouseY * e/10;
+    xOffsetTotal += rMouseX * (e / 10)*scale;
+    yOffsetTotal += rMouseY * (e / 10)*scale;
+  }
 }
 void mouseDragged() {
+  // offset pro Frame wird berechnet und zu Gesamtoffset addiert, wenn Maus gedrückt ist
   if (locked) {
     xOffset = (mouseX - xPressed);
     yOffset = (mouseY - yPressed);
-    xOveralOffset += xOffset;
-    yOveralOffset += yOffset;
+    xOffsetTotal += xOffset;
+    yOffsetTotal += yOffset;
     xPressed = mouseX;
     yPressed = mouseY;
     cursor(MOVE);
   }
 }
 void keyPressed() {
-  if (key=='w') {
-    b  = 100;
-  }
-  if (key=='s') {
-    b  = 1;
-  }
+  // Leertaste : zoom & offset zurückgesetzt
   if (key ==' ') {
-    scaling = 1;
-    xOveralOffset = 0;
-    yOveralOffset = 0;
+    scale = 1;
+    xOffsetTotal = 0;
+    yOffsetTotal = 0;
+  }
+  // GODMODE
+  if (key == 'g'){
+    godmode = !godmode;
+  }
+  // GODMODE kommandos
+  if (key == 'n' && godmode == true) {
+    map.population.add(new Creature(mouseX, mouseY, map.fW, currentID));
+    currentID++;
   }
 }
+
 void mousePressed() {
+  // temporäre Variablen für Offsetberechnung
   locked = true;
   xPressed = mouseX;
   yPressed = mouseY;
-  if (map.keiner.isPressed())map.graph = "keiner";
-  if (map.bAeltestes.isPressed())map.graph = "aeltestes";
-  if (map.bAltersschnitt.isPressed())map.graph = "schnitt";
-  if (map.bFitness.isPressed())map.graph = "fitness";
 }
 void mouseReleased() {
+  // offset soll nicht mehr berechnet werden
   locked = false;
   cursor(ARROW);
 }
-
+//// Helfermethoden
 byte[] intToBytes(int x) {
   int bLength = floor(x/255);
   byte[] returnValue = new byte[bLength+1];
@@ -136,22 +185,30 @@ int bytesToInt(byte[] b) {
   return returnValue;
 }
 
+//// I/O Methoden
 boolean fileExists(String path) {
   File file=new File(sketchPath(path));
-  boolean exists = file.exists();
-  if (exists) {
-    return true;
-  } else {
-    return false;
-  }
+  return file.exists();
 }
-
-////////////////////////////      TODO       /////////////////////
-/*
-- grow optimieren
- - moegliche Fehler koennen beim Kopieren der Connections auftreten (falsche Referenzen, etc...)
- - Farben werden nach einiger Zeit grau
- - Fitness noch nicht vollstaendig implementiert --> muss noch Auswirkung auf die Paarung haben
- - möglichst effizienten Stammbaum erstellen
- - vllt durchschnittliche Lebensdauer der Vorfahren in die Fitnessfunktion --> erstmal Stammbaum
- */
+//// speichern & laden von 4 byte daten
+void save(float value,int precision,String path){
+  int saveVal = int(value*pow(10,precision));
+  String[] tempBin = binary(saveVal,32).split("");
+  String[] bin = new String[] {"","","",""};
+  for(int i = 0;i<32;i++){
+    bin[floor(i/8)] += tempBin[i];
+  }
+  byte[] saveData = new byte[4];
+  for(int i = 0; i<4;i++){
+    saveData[i] = byte(unbinary(bin[i]));
+  }
+  saveBytes(path,saveData);
+}
+float load(int precision,String path){
+  byte[] bin = loadBytes(path);
+  String s = "";
+  for(int i = 0;i<bin.length;i++){
+    s += (binary(bin[i]));
+  }
+  return unbinary(s)/pow(10,precision);
+}

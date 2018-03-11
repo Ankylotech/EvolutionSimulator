@@ -95,25 +95,6 @@ try:
 except:
     pass
 
-x = []
-y = []
-
-path = currDir + "/data/population/population%s.txt"% myIndex
-
-try:
-    with open(path) as data:
-        data = data.read().split(";")
-        data.pop(-1)
-        for i in data:
-            x.append(make_tuple(i)[0])
-            y.append(make_tuple(i)[1])
-        plt.plot(x,y)
-        plt.xlabel("Jahre")
-        plt.ylabel("Populationsgröße")
-        plt.show()
-except:
-    pass
-
 def plotIDs(dataTuple, currentPlot):
     print("calleds")
     currentPlot.plot(dataTuple[0], dataTuple[1], "bx", markersize=4)
