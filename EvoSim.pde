@@ -3,7 +3,9 @@ import grafica.*;
 //// Verschiedene Buttonarten
 
 //    ! Reihenfolge darf nicht verändert werden !    //
-enum ButtonType {FITNESS, AVGAGE, OLDEST, FLOOD, GENERATION,SAVE};
+enum ButtonType {
+  FITNESS, AVGAGE, OLDEST, FLOOD, GENERATION
+};
 
 //// Outputs zum speichern der Daten
 
@@ -22,7 +24,6 @@ boolean save = true;
 // speichert die momentane Skalierung, offset, etc.
 
 // fenstergroesse muss seperat geändert werden, sollte immer gleich sein & einen schönen Wert haben, z.B. 100, 500,...
-final int windowSize = 1000;
 int worldSize;
 float scale = 1;
 float xOffset = 0.0;
@@ -42,7 +43,7 @@ int plotX = 0;
 int plotY = 0;
 int plotWidth = 250;
 int plotHeight = 250;
-float[] margin = new float[] {30,30,10,10};
+float[] margin = new float[] {30, 30, 10, 10};
 
 ButtonType selectedButton = ButtonType.FITNESS;
 
@@ -53,26 +54,28 @@ int currentID = 0;
 boolean godmode = false;
 // wenn Maus gedrückt, dann locked wahr
 boolean locked = false;
+// friert die Simulation ein
+boolean freeze = false;
 
 
 //// Welt
 public World map;
 
 void settings() {
-  size(1000, 1000);
+  size(800, 800);
 }
 
 void setup() {
   // Einstellungen
   frameRate(50);
   noStroke();
-  
+  loop();
   // Welt erstellt
-  map = new World(50, 100); // Darf nicht 10 sein, sonst hängt sich die Simulation auf (??????)
-  
+  map = new World(125,100); // Darf nicht 10 sein, sonst hängt sich die Simulation auf (??????)
+
   // Interface (neuesFenster) erstellt
   iface = new Interface();
-  
+
   // saveDataIndex erhöht, Dateien & Writer erstellt
   if (save) {
     if (!fileExists(sketchPath("saveDataIndex.dat"))) {
@@ -90,12 +93,10 @@ void setup() {
     outputDeathsAndBirths = createWriter("./data/todeUndGeburtenLw/todeUndGeburtenLw"+fileNumber+".txt");
     outputPopulationSize = createWriter("./data/population/population"+fileNumber+".txt");
   }
-  
+
   // Welt & Kreaturen werden angezeigt
   map.showWorld();
   map.showCreature(map.getCreatures());
-  
-  map.loadWorld("./data");
 }
 
 // Mainloop
@@ -106,7 +107,7 @@ void draw() {
 // Eventhandler
 void mouseWheel(MouseEvent event) {
   float e = event.getCount();
-  
+
   // Grenzwerte der Scale werden überprüft
   scale -= (e / 10)*scale;
   if (scale < 0.01) {
@@ -115,7 +116,7 @@ void mouseWheel(MouseEvent event) {
   if (scale > 10) {
     scale = 10;
   }
-  
+
   // zoom auf Mauszeiger
   if (!(scale <= 0.01 || scale >= 10)) {
     float rMouseX = (mouseX-(xOffsetTotal))/scale;
@@ -145,12 +146,12 @@ void keyPressed() {
     yOffsetTotal = 0;
   }
   // GODMODE
-  if (key == 'g'){
+  if (key == 'g') {
     godmode = !godmode;
   }
   // GODMODE kommandos
   if (key == 'n' && godmode == true) {
-    map.population.add(new Creature(mouseX, mouseY, map.fW, currentID));
+    map.population.add(new Creature(mouseX, mouseY, map, currentID));
     currentID++;
   }
 }
@@ -189,26 +190,4 @@ int bytesToInt(byte[] b) {
 boolean fileExists(String path) {
   File file=new File(sketchPath(path));
   return file.exists();
-}
-//// speichern & laden von 4 byte daten
-void save(float value,int precision,String path){
-  int saveVal = int(value*pow(10,precision));
-  String[] tempBin = binary(saveVal,32).split("");
-  String[] bin = new String[] {"","","",""};
-  for(int i = 0;i<32;i++){
-    bin[floor(i/8)] += tempBin[i];
-  }
-  byte[] saveData = new byte[4];
-  for(int i = 0; i<4;i++){
-    saveData[i] = byte(unbinary(bin[i]));
-  }
-  saveBytes(path,saveData);
-}
-float load(int precision,String path){
-  byte[] bin = loadBytes(path);
-  String s = "";
-  for(int i = 0;i<bin.length;i++){
-    s += (binary(bin[i]));
-  }
-  return unbinary(s)/pow(10,precision);
 }

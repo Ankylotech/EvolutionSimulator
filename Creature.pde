@@ -2,68 +2,69 @@ public class Creature {
   
   //// Bewegung
   // Position x & y
-  PVector position; // in save&load
+  PVector position;
   // Geschwindigkeit in x & y Richtung gespeichert
-  PVector velocity; // in save&load
-
- 
+  PVector velocity;
+  
+  // Verbrauch Land & Wasser
+  float movementConsumption = 3;
+  float additionalMovementConsumptionInWater = 10;
+  // Wasserreibung 
+  float waterFriction = 0.2;
+  
   //// Gene
-  float eatingRate = World.stdEatingRate; // GEN  // in save&load
-  float maxVelocity = World.stdMaxVelocity; //GEN  // in save&load
-  float attackValue = World.stdAttackValue; // GEN  // in save&load
-  float reproductionWaitingPeriod = World.stdReproductionWaitingPeriod; // GEN  // in save&load
+  float eatingRate = World.stdEatingRate; // GEN
+  float maxVelocity = World.stdMaxVelocity; //GEN
+  float attackValue = World.stdAttackValue; // GEN
   
   //// wichtige Werte für die Kreatur
-  color furColour;  // in save&load
-  float energy = 1400.0;  // in save&load
+  color furColour;
+  float energy = 1000.0;
+  float reproductionWaitingPeriod = 0.4;
   // wird an Welt & Energielevel skaliert
   float diameter;
-  boolean readyToGiveBirth = false;  // in save&load
-  double age = 0; // in save&load
-  int generation;  // in save&load
+  boolean readyToGiveBirth = false;
+  double age = 0;
+  int generation;
   
   //// statische Werte
-  final static float mutationRate = 0.2;
+  final static float mutationRate = 0.15;
   final static float maxEnergy = 2500.0;
-  final static float energyConsumption = 2;
-  // Verbrauch Land & Wasser
-  final static float movementConsumption = 3;
-  final static float additionalMovementConsumptionInWater = 5;
-  // Wasserreibung 
-  final static float waterFriction = 0.1;
+  final static float energyConsumption = 10;
   final static float birthEnergy = 800;
   final static float reproductionWill = 0.4;
   final static float reproductionThreshold = 0.5;
   final static float mixingThreshold = 0.3;
-  public final static int maxMovementRotationAngle = 20; // Grad
-  public final static int maxSensorRotationAngle = 10; // Grad
+  final static int maxMovementRotationAngle = 20; // Grad
+  final static float energyConsumptionRotation = 6;
   
   //// Berechnungsvariablen
-  float lastBirth = 0;  // in save&load
+  float lastBirth = 0;
   boolean red = false;
   float redtime = 0;
-  boolean inTop10 = false;  // save&load
-  int id;  // in save&load
+  boolean inTop10 = false;
+  int id;
   
   //// Neuronales Netzwerk
   NeuralNetwork NN;
   // Hiddenlayerwerte
-  int hLAmount = 1;
-  int hLLength = 8;
+  final static int hLAmount = 1;
+  final static int hLLength = 7;
   
   float memory = 1;
+  float memory2 = 1;
   float fitness = 0;
   
   //// Fühler
-  Sensor sensor;// save&load
+  Sensor sensor;
    
    
    
   // sollte bei 1. Generation verwendet werden
-  Creature(int x, int y, float fW, int ID) {
+  Creature(int x, int y, World world, int ID) {
     
     id = ID;
-    diameter = fW*1.25;
+    diameter = world.fW*world.diameterMultiplier;
     
     generation = 1;
 
@@ -80,16 +81,15 @@ public class Creature {
   }
 
   // 2. Konstruktor, damit die Farbe bei den Nachkommen berücksichtigt werden kann und die Gewichte übergeben werden können
-  //                                  Elternweights                         Elternfellfarben       g: Generation, f1, f2: Fressrate, mG1, mG2: maxGeschwindigkeit, r1, r2: Reproduktionswartezeit, a1, a2: Angriffswert
-  Creature(int x, int y, Matrix[] weights1, Matrix[] weights2, color furColour1, color furColour2, int g, float f1, float mG1, float r1, float a1, float f2, float mG2, float r2, float a2, int ID) {
+  //                                  Elternweights                         Elternfellfarben       g: Generation, f1, f2: Fressrate, mG1, mG2: maxGeschwindigkeit, a1, a2: Angriffswert
+  Creature(int x, int y, Matrix[] weights1, Matrix[] weights2, color furColour1, color furColour2, int g, float f1, float mG1, float a1, float f2, float mG2, float a2, int ID) {
     
     id = ID;
-    diameter = map.getFieldWidth()*1.25;
+    diameter = map.getFieldWidth()*map.diameterMultiplier;
     
     // Gene der Eltern werden vermischt & mutiert
     eatingRate = mutate(mixGenes(f1, f2));
     maxVelocity = mutate(mixGenes(mG1, mG2));
-    reproductionWaitingPeriod = mutate(mixGenes(r1, r2));
     attackValue = mutate(mixGenes(a1, a2));
 
     generation = g+1;
@@ -113,6 +113,8 @@ public class Creature {
     
     sensor = new Sensor(this);
   }
+  
+
   
   // Kreatur wird gemalt
   public void drawCreature() {
@@ -156,36 +158,38 @@ public class Creature {
 
   // NeuralNetwork input
   public void input() {
-    // Werte werden auf -6 bis 6 gemappt, weil die Sigmoidfunktion so fast alle Werte zwischen 0 und 1 erreichen kann
-    
+    // Werte auf 0 bis 1 genormt
     // Geschwindigkeit
-    NN.setInputNVelocity(map(velocity.mag(), 0, maxVelocity, -6, 6));
+    NN.setInputNVelocity(map(velocity.mag()/maxVelocity, 0,1,-1,1));
     // eigene Energie
-    NN.setInputNEnergy(map(energy, 0, maxEnergy, -6, 6));
+    NN.setInputNEnergy(map(energy/maxEnergy,0,1,-1,1));
     // Feldart
-    NN.setInputNFieldType(map(map.getField((int)position.x, (int)position.y).isLandInt(), 0, 1, -6, 6));
+    NN.setInputNFieldType(map(map.getField((int)position.x, (int)position.y).isLandInt(),0,1,-1,1));
     // Memory
-    NN.setInputNMemory(map(memory, 0, 1, -6, 6));
-    // Bias // immer 1
-    NN.setInputNBias(1);
+    NN.setInputNMemory(memory);
+    NN.setInputNMemory2(memory2);
+    /*
+    // Bias // immer 6
+    NN.setInputNBias(6);
     // Richtung
     NN.setInputNDirection(map(degrees(velocity.heading()), -180, 180, -6, 6));
     // Paarungspartner/Gegner Fitness
+    */
     Creature c = sensor.getSensorPartner();
     if(c != null){
-      NN.setInputNPartnerFitness(map(c.fitness/map.fitnessMaximum, 0, 1, -6, 6));
+      NN.setInputNPartnerFitness(map(c.fitness/map.fitnessMaximum,0,1,-1,1));
     } else {
-      NN.setInputNPartnerFitness(-6);
+      NN.setInputNPartnerFitness(0);
     }
 
     //// Fühler
     
     // Gegnerenergie
-    NN.setInputNSensorEnemyEnergy(map(sensor.getSensorEnemyEnergy(), 0, maxEnergy, -6, 6));
+    NN.setInputNSensorEnemyEnergy(map(sensor.getSensorEnemyEnergy()/maxEnergy,0,1,-1,1));
     // Feldenergie
-    NN.setInputNSensorFieldEnergy(map(sensor.getSensorFieldEnergy(), 0, Field.maxOverallEnergy, -6, 6));
+    NN.setInputNSensorFieldEnergy(map(sensor.getSensorFieldEnergy()/Field.maxOverallEnergy,0,1,-1,1));
     // Feldart
-    NN.setInputNSensorFieldType(map(sensor.getSensorFieldType(), 0, 1, -6, 6));
+    NN.setInputNSensorFieldType(map(sensor.getSensorFieldType(),0,1,-1,1));
   }
 
   // Bewewgung
@@ -194,6 +198,7 @@ public class Creature {
       energy -= movementConsumption*(v/World.stdMaxVelocity);
       velocity.rotate(radians(angle));
       this.sensor.rotateSensor(angle);
+      energy -= (angle/maxMovementRotationAngle)*energyConsumptionRotation;
       velocity.setMag(v);
 
       // im Wasser bewegt sich die Kreatur langsamer und verbraucht mehr Energie
@@ -205,17 +210,17 @@ public class Creature {
       }
 
       // Kreatur wird auf die gegenüberliegende Seite teleportiert, wenn sie außerhalb der Map ist
-      if (position.x > windowSize) { // wenn zu weit rechts        
-        position.set(position.x-windowSize, position.y);
+      if (position.x > map.worldBounds) { // wenn zu weit rechts        
+        position.set(position.x-map.worldBounds, position.y);
       }
       if (position.x < 0) { // wenn zu weit links       
-        position.set(windowSize+position.x, position.y); // + position.x, weil es immer ein negativer Wert ist
+        position.set(map.worldBounds+position.x, position.y); // + position.x, weil es immer ein negativer Wert ist
       }
-      if (position.y > windowSize) { // wenn zu weit unten
-        position.set(position.x, position.y-windowSize);
+      if (position.y > map.worldBounds) { // wenn zu weit unten
+        position.set(position.x, position.y-map.worldBounds);
       }
       if (position.y < 0) { // wenn zu weit oben
-        position.set(position.x, windowSize+position.y); // + position.y, weil es immer ein negativer Wert ist
+        position.set(position.x, map.worldBounds+position.y); // + position.y, weil es immer ein negativer Wert ist
       }
     }
   }
@@ -233,13 +238,8 @@ public class Creature {
       }
 
       if (!(victim == null)) {
-        if (victim.getEnergy() >= attackValue) {
-          victim.addEnergy(-attackValue);
-          this.addEnergy(attackValue);
-        } else {
-          this.addEnergy(victim.getEnergy());
-          victim.setEnergy(0);
-        }
+        victim.addEnergy(-attackValue);
+        this.addEnergy((attackValue/World.stdAttackValue)*10);
         if (energy>maxEnergy) { // Kreatur-Energie ist über dem Maximum
           energy = maxEnergy;
         }
@@ -250,7 +250,7 @@ public class Creature {
 
   // Grundverbrauch
   public void live() {
-    energy -= energyConsumption*(age/100);
+    energy -= energyConsumption*(age/7);
   }
   public void hit() {
     redtime = 30;
@@ -264,8 +264,7 @@ public class Creature {
     float eatingRate = ((this.getEatingRate() - World.stdEatingRate)/World.stdEatingRate)*2;
     float maxV = ((this.getMaxVelocity() - World.stdMaxVelocity)/World.stdMaxVelocity)*2;
     float attack = ((this.getAttackValue() - World.stdAttackValue)/World.stdAttackValue)*2;
-    float waitingPeriod = (World.stdReproductionWaitingPeriod/this.getReproductionWaitingPeriod() - 1)*2;
-    float result = (bias + a + g + eatingRate + maxV + attack + waitingPeriod);
+    float result = (bias + a + g + eatingRate + maxV + attack);
     if(result < 0){
       result = 0;
     }
@@ -401,9 +400,12 @@ public class Creature {
     }
   }
   
+  ////speichern und laden
   
-  public void memorise(float m) {
+  
+  public void memorise(float m, float m2) {
     memory = m;
+    memory2 = m2;
   }
 
   public void addEnergy(float e) {
@@ -461,72 +463,4 @@ public class Creature {
   public int getID(){
     return id;
   }
-  
-  ////speichern und laden
-  
-  void saveCreature(String path, int CNr){
-    File f = new File(path + "/Creature" + CNr);
-    f.mkdir();
-    String rPath = f.getPath();
-    
-    save(position.x,4,rPath + "/positionX.dat");
-    save(position.y,4,rPath + "/positionY.dat");
-    save(velocity.x,4,rPath + "/velocityX.dat");
-    save(velocity.y,4,rPath + "/velocityY.dat");
-    
-    save(eatingRate,5,rPath + "/eatingRate.dat");
-    save(maxVelocity,5,rPath + "/maxVelocity.dat");
-    save(attackValue,5,rPath + "/attackValue.dat");
-    save(reproductionWaitingPeriod,5,rPath + "/reproductionWaitingPeriod.dat");
-    
-    save(red(furColour),2,rPath+"/Colour/red.dat");
-    save(green(furColour),2,rPath+"/Colour/green.dat");
-    save(blue(furColour),2,rPath+"/Colour/blue.dat");
-
-    save(energy,2,rPath+"/energy.dat");
-    
-    save(int(readyToGiveBirth),0,rPath + "/readyToGiveBirth.dat");
-    save((float)lastBirth,3,rPath + "/lastBirth.dat");
-    
-    save((float) age,5,rPath+"/age.dat");  
-    save(generation,0,rPath+"/generation.dat");
-    
-    save(id,0,rPath+"/ID.dat");
-    
-    save(int(inTop10),0,rPath + "/inTo10.dat");
-    
-    sensor.saveSensor(rPath);
-    NN.saveNeuralNetwork(rPath);
-  }
-  void loadCreature(String path, int CNr){
-    String rPath = path + "/Creature" + CNr;
-    
-    position.x = load(4,rPath + "/positionX.dat");
-    position.y = load(4,rPath + "/positionY.dat");
-    velocity.x = load(4,rPath + "/velocityX.dat");
-    velocity.y = load(4,rPath + "/velocityY.dat");
-    
-    eatingRate = load(5,rPath + "/eatingRate.dat");
-    maxVelocity = load(5,rPath + "/maxVelocity.dat");
-    attackValue = load(5,rPath + "/attackValue.dat");
-    reproductionWaitingPeriod = load(5,rPath + "/reproductionWaitingPeriod.dat");
-    
-    furColour = color(load(2,rPath+"/Colour/red.dat"),load(2,rPath+"/Colour/green.dat"),load(2,rPath+"/Colour/blue.dat"));
-
-    energy = load(2,rPath+"/energy.dat");
-    
-    readyToGiveBirth = boolean((int)load(0,rPath + "/readyToGiveBirth.dat"));
-    lastBirth = load(3,rPath + "/lastBirth.dat");
-    
-    age = load(5,rPath+"/age.dat");  
-    generation = (int)load(0,rPath+"/generation.dat");
-    
-    id = (int)load(0,rPath+"/ID.dat");
-    
-    inTop10 = boolean(int(load(0,rPath+"/inTop10.dat")));
-    
-    sensor.loadSensor(rPath);
-    NN.loadNeuralNetwork(rPath);
-  }
-  
 }

@@ -1,8 +1,8 @@
-class Interface extends PApplet {   //<>//
-  
+class Interface extends PApplet {   //<>// //<>//
+
   // Grafika Library für Plot benutzt
   // in Video erklärt
-  
+
   Button[] buttons;
 
   Button bFitness;
@@ -10,9 +10,8 @@ class Interface extends PApplet {   //<>//
   Button bOldest;
   Button bFlood;
   Button bGeneration;
-  
-  Button bSave;
-  
+
+
   Label floodOngoing;
 
   int bg = 230;
@@ -25,7 +24,7 @@ class Interface extends PApplet {   //<>//
     // zweites Fenster gerufen
     super();
     PApplet.runSketch(new String[] {"LiveData"}, this);
-    
+
     this.getSurface().setTitle("Live Data");
   }
 
@@ -48,11 +47,11 @@ class Interface extends PApplet {   //<>//
     bOldest = new Button(100, plotHeight, 100, 50, "Ältestes Alter", ButtonType.OLDEST);
     bFlood = new Button(width-100, height-50, 100, 50, "FLUT", ButtonType.FLOOD);
     bGeneration = new Button(100, plotHeight+50, 100, 50, "Generation", ButtonType.GENERATION);
-    
-    bSave = new Button(width-100, height-100, 100, 50, "save", ButtonType.SAVE);
 
-    buttons = new Button[] {bFitness, bAvgAge, bOldest, bFlood, bGeneration,bSave}; // order must not be changed
-    
+ 
+
+    buttons = new Button[] {bFitness, bAvgAge, bOldest, bFlood, bGeneration}; // order must not be changed
+
     floodOngoing = new Label(plotWidth+leftSpacing, plotHeight-75, 130, 65, "FLUT", color(255, 46, 46), color(255));
   }
 
@@ -68,16 +67,19 @@ class Interface extends PApplet {   //<>//
   void drawPlot() {
     // Exceptions treten ohne ersichtlichen Grund auf, Plot funktioniert weiterhin gut
     // Liegt an Grafika
-    try{
+    try {
       plot.beginDraw();
       plot.drawBackground();
       plot.drawXAxis();
       plot.drawYAxis();
       plot.drawTitle();
       plot.drawLines();
-    } catch (IndexOutOfBoundsException e) {
-    } catch (NullPointerException e){
-    } catch(Exception e){
+    } 
+    catch (IndexOutOfBoundsException e) {
+    } 
+    catch (NullPointerException e) {
+    } 
+    catch(Exception e) {
       e.printStackTrace();
     }
     plot.endDraw();
@@ -96,8 +98,8 @@ class Interface extends PApplet {   //<>//
     bOldest.show();
     bGeneration.show();
     bFlood.show();
-    bSave.show();
-    if(map.floodOngoing){
+
+    if (map.floodOngoing) {
       floodOngoing.show();
     }
   }
@@ -119,11 +121,10 @@ class Interface extends PApplet {   //<>//
       buttons[selectedButton.ordinal()].selected = false;
       bGeneration.selected = true;
       selectedButton = bGeneration.type;
-    } else if (bSave.isPressed()) {
-      map.saveWorld("./data"); 
     } else if (bFlood.isPressed()) {
       map.flood();
     }
+    
     switch(selectedButton) {
     case FITNESS:
       plot.setPoints(map.fitnessGPoints);
@@ -170,11 +171,11 @@ class Interface extends PApplet {   //<>//
         rectC = color(255);
         textC = color(0);
       } else {
-        rectC = color(6,9,46);
+        rectC = color(6, 9, 46);
         textC = color(255);
       }
       if (this.isPressed()) {
-        rectC = color(197,200,229);
+        rectC = color(197, 200, 229);
         textC = color(0);
       }
 
@@ -192,12 +193,12 @@ class Interface extends PApplet {   //<>//
       return (mouseX>posX && mouseX<posX + bWidth && mouseY > posY && mouseY < posY + bHeight && mousePressed);
     }
   }
-  
-  class Label{
+
+  class Label {
     float posX;
     float posY;
-    float bWidth;
-    float bHeight;
+    float lWidth;
+    float lHeight;
     String name;
 
     color rectC;
@@ -206,8 +207,8 @@ class Interface extends PApplet {   //<>//
     Label(float x, float y, float w, float h, String n, color rC, color tC) {   
       posX = x;
       posY = y;
-      bWidth = w;
-      bHeight = h;
+      lWidth = w;
+      lHeight = h;
       name = n;
       rectC = rC;
       textC = tC;
@@ -217,12 +218,13 @@ class Interface extends PApplet {   //<>//
       stroke(0);
 
       fill(rectC);
-      rect(posX, posY, bWidth, bHeight, 10);
+      rect(posX, posY, lWidth, lHeight, 10);
 
       fill(textC);
       textAlign(CENTER);
       textSize(20);
-      text(name, posX+bWidth/2, (posY+bHeight/2));
+      text(name, posX+lWidth/2, (posY+lHeight/2));
+      text(round((1-map.floodDuration/map.initialFloodDuration)*100)+"%", posX+lWidth/2, posY+lHeight/2+20);
       noStroke();
     }
   }

@@ -2,38 +2,39 @@ public class World {
 
   //// Veränderbare Werte
   // Flutwerte
-  float floodProbability = 0.00005;
-  float firstPossibilityOfFlood = 15;
+  float floodProbability = 0.00002;
+  float firstPossibilityOfFlood = 20;
   float maxFloodDuration = 3;
 
   // Kreatur: Standard Werte
-  final public static float stdEatingRate = 20;
+  final public static float stdEatingRate = 17;
   final public static float stdMaxVelocity = 2;
   final public static float stdAttackValue = 60;
-  final public static float stdReproductionWaitingPeriod = 0.2;
+  float diameterMultiplier = 0.25;
 
   // Welt: Standard Werte
-  final public static float stdOceanLevel = 45;
-
+  final public static float stdOceanLevel = 44;
+  ////
   //// Welt
   // Welt
-  Field[][] world; // save&load
-  ArrayList<Field> land;  // save&load
-  float fW;
+  Field[][] world;
+  ArrayList<Field> land;
+  float fW = 10;
+  float worldBounds;
 
   // Population
-  ArrayList<Creature> population;  // save&load
-  int initialPopulationSize;  // save&load
+  ArrayList<Creature> population;
+  int initialPopulationSize;
   float stdDiameter;
 
   // Zeit
-  double year;  // save&load
+  double year;
   double timePerFrame = 0.0005;
   int multiplier = 10000;
 
   // Statistiken
   Creature[] top10 = new Creature[10];
-  float totalFitness = 0; 
+  float totalFitness = 0;
   float fitnessMaximum = 1; // arbitrary value
 
   float totalAge = 0;
@@ -44,7 +45,7 @@ public class World {
   int maxGeneration;
 
   //// Flut
-  float inititalFloodDuration;
+  float initialFloodDuration;
   float floodDuration;
   float floodHeight;
   boolean floodOngoing = false;
@@ -78,9 +79,10 @@ public class World {
     generationGPoints = new GPointsArray();
     generationGPoints.add(0, 1);
 
-    // skaliert die Feldbreite an die Fenstergroesse und die Feldanzahl pro Reihe
-    fW = windowSize/worldSize;
-    stdDiameter = fW * 1.25;
+    stdDiameter = fW * diameterMultiplier;
+    worldBounds = worldSize*fW;
+
+    land = new ArrayList<Field>();
 
     // generiert Welt
     world = new Field[worldSize][worldSize];
@@ -89,18 +91,12 @@ public class World {
       float xNoise = 0.0;
       for (int x=0; x<worldSize; x++) {
         world[x][y] = new Field(x*fW, y*fW, noise(xNoise, yNoise)*100, fW, x, y);
-        xNoise += 0.038;
-      }
-      yNoise += 0.038;
-    }
-    land = new ArrayList<Field>();
-
-    for (int i = 0; i<worldSize; i++) {
-      for (Field f : world[i]) {
-        if (f.isLand()) {
-          land.add(f);
+        if (world[x][y].isLand()) {
+          land.add(world[x][y]);
         }
+        xNoise += 0.046;
       }
+      yNoise += 0.046;
     }
 
     // generiert Anfangspopulation
@@ -109,12 +105,11 @@ public class World {
       int posX;
       int posY;
       do {
-        //println("\n\ngeneriere Creature");
-        posX = (int)random(0, windowSize);
-        posY = (int)random(0, windowSize);
+        posX = (int)random(0, this.worldBounds);
+        posY = (int)random(0, this.worldBounds);
       } while (!this.getField(posX, posY).isLand());
 
-      population.add(new Creature(posX, posY, fW, currentID));
+      population.add(new Creature(posX, posY, this, currentID));
       currentID++;
 
       // anfangs werden ersten 10 zu Top 10
@@ -172,12 +167,10 @@ public class World {
         max(c1.getGeneration(), c2.getGeneration()), 
         c1.getEatingRate(), 
         c1.getMaxVelocity(), 
-        c1.getReproductionWaitingPeriod(), 
         c1.getAttackValue(), 
 
         c2.getEatingRate(), 
         c2.getMaxVelocity(), 
-        c2.getReproductionWaitingPeriod(), 
         c2.getAttackValue(), 
 
         currentID
@@ -198,14 +191,13 @@ public class World {
       flood();
     }
     if (floodOngoing) {
-      //println(floodIncreasePerFrame);
       floodDuration -= (float)timePerFrame;
       if (floodDuration <= 0) {
         floodOngoing = false;
         for (Field f : land) {
           f.oceanLevel = stdOceanLevel;
         }
-      } else if (floodDuration/inititalFloodDuration > 0.25) {
+      } else if (floodDuration/initialFloodDuration > 0.25) {
         for (Field f : land) {
           f.oceanLevel += floodIncreasePerFrame;
         }
@@ -232,7 +224,7 @@ public class World {
       c.age();
       c.move(c.NN.getGeschwindigkeit(c), c.NN.getRotation());
       c.eat(c.NN.getEatingWill());
-      c.memorise(c.NN.getMemory());
+      c.memorise(c.NN.getMemory(), c.NN.getMemory2());
       c.attack(c.NN.getAttackWill()); // hilft, Bevölkerung nicht zu gross zu halten
 
       totalAge += c.getAge();
@@ -254,7 +246,6 @@ public class World {
         deathCountPerYear++;
         continue;
       }
-
       c.updateFitness();
     }
 
@@ -278,11 +269,11 @@ public class World {
         int posX;
         int posY;
         do {
-          posX = (int)random(0, windowSize);
-          posY = (int)random(0, windowSize);
+          posX = (int)random(0, map.worldBounds);
+          posY = (int)random(0, map.worldBounds);
         } while (!this.getField(posX, posY).isLand());
 
-        population.add(new Creature(posX, posY, fW, currentID));
+        population.add(new Creature(posX, posY, this, currentID));
         currentID++;
       }
     }
@@ -365,7 +356,7 @@ public class World {
     floodHeight = random(5, 12);
     floodIncreasePerFrame = floodHeight/((floodDuration * 0.75)/(float)timePerFrame);
     floodDecreasePerFrame = floodHeight/((floodDuration * 0.25)/(float)timePerFrame);
-    inititalFloodDuration = floodDuration;
+    initialFloodDuration = floodDuration;
   }
 
   float calculateFitnessMaximum() {
@@ -452,6 +443,10 @@ public class World {
     }
   }
 
+  void loadSelectedFolder() {
+    selectFolder("Select file to load", "loadWorld");
+  }
+
   //// Getter
   public Creature[] getCreatures() {
     return population.toArray(new Creature[population.size()]);
@@ -498,42 +493,5 @@ public class World {
   }
   public float getFieldWidth() {
     return fW;
-  }
-
-
-  void saveWorld(String path) {
-    File f = new File(path + "/WorldSave");
-    f.mkdir();
-
-    save(worldSize, 0, f.getPath()+"/worldSize.dat");
-
-    for (int i = 0; i<worldSize; i++) {
-      for (int j = 0; j<worldSize; j++) {
-        world[i][j].saveField(f.getPath() + "/Fields",i*worldSize+j);
-      }
-    }
-    save(population.size(),0,f.getPath()+ "/populationSize.dat" );
-    save(initialPopulationSize,0,f.getPath()+ "/initialPopulationSize.dat" );
-    
-    for(int i = 0; i<population.size();i++){
-      population.get(i).saveCreature(f.getPath()+"/Creatures",i);
-    }
-  }
-  void loadWorld(String path){
-    String rPath = (path + "/WorldSave");
-    
-    worldSize = (int)load(0,rPath+"/worldSize.dat");
-    
-    for (int i = 0; i<worldSize; i++) {
-      for (int j = 0; j<worldSize; j++) {
-        world[i][j].loadField(rPath + "/Fields",i*worldSize+j);
-      }
-    }
-    
-    initialPopulationSize = (int) load(0,rPath+ "/initialPopulationSize.dat" );
-    
-    for(int i = 0; i<load(0,rPath+ "/populationSize.dat" );i++){
-      population.get(i).saveCreature(rPath+"/Creatures",i);
-    }
   }
 }
