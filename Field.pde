@@ -26,35 +26,34 @@ class Field {
     arrayPosX = aX;
     arrayPosY = aY;
     influencingValues = new float[4];
-
+    maxEnergyValue = maxOverallEnergy;
     if (this.isLand()) {
-      maxEnergyValue = maxOverallEnergy;
       influenceable = true;
     } else {
-      maxRegenerationrate = 0;
-      maxEnergyValue = 0;
       influenceable = false;
     }
   }
- 
+
   // Wachstumsalgorithmus
   public void grow() {
-    if (influenceable && noiseHeight>oceanLevel) {
-      regenerationrate = 0;
-      float rest = maxRegenerationrate;
-      influencingValues = sort(influencingValues);
-      for (int i = 3; i >= 0; i--) { 
-        if (influencingValues[i] > random(0.5, 0.8)) {
-          regenerationrate += influencingValues[i] * rest;
+    if (noiseHeight>oceanLevel) {
+      if (influenceable) {
+        regenerationrate = 0;
+        float rest = maxRegenerationrate;
+        influencingValues = sort(influencingValues);
+        for (int i = 3; i >= 0; i--) { 
+          if (influencingValues[i] > random(0.5, 0.8)) {
+            regenerationrate += influencingValues[i] * rest;
+          }
+          rest = maxRegenerationrate - regenerationrate;
         }
-        rest = maxRegenerationrate - regenerationrate;
       }
-    }
-    regenerationrate *= stdOceanLevel+20/noiseHeight;
-    if (regenerationrate>maxRegenerationrate)regenerationrate = maxRegenerationrate;
+      regenerationrate *= sq(oceanLevel+10/noiseHeight);
+      if (regenerationrate>maxRegenerationrate)regenerationrate = maxRegenerationrate;
 
-    energyValue += regenerationrate;
-    if (energyValue > maxEnergyValue)energyValue = maxEnergyValue;
+      energyValue += regenerationrate;
+      if (energyValue > maxEnergyValue)energyValue = maxEnergyValue;
+    } else energyValue = 0;
   }
 
   public boolean isLand() {
@@ -98,49 +97,50 @@ class Field {
 
   // Wachstumsalgorithmus
   public void influenceByWater() {
-    boolean water = false;
-    if (arrayPosX > 0) water = !map.getFieldInArray(arrayPosX-1, arrayPosY).isLand();
-    if (!water && arrayPosY > 0) water = !map.getFieldInArray(arrayPosX, arrayPosY-1).isLand();
-    if (!water && arrayPosX < worldSize -1 ) water = !map.getFieldInArray(arrayPosX+1, arrayPosY).isLand();
-    if (!water && arrayPosY < worldSize -1) water = !map.getFieldInArray(arrayPosX, arrayPosY+1).isLand();
-    
-    if (water) {
-      regenerationrate = maxRegenerationrate;
-      influenceable = false;
-    }else{
-      regenerationrate = 0;
-      influenceable = true;
+    if (isLand()) {
+      boolean water = false;
+      if (arrayPosX > 0) water = !map.getFieldInArray(arrayPosX-1, arrayPosY).isLand();
+      if (!water && arrayPosY > 0) water = !map.getFieldInArray(arrayPosX, arrayPosY-1).isLand();
+      if (!water && arrayPosX < worldSize -1 ) water = !map.getFieldInArray(arrayPosX+1, arrayPosY).isLand();
+      if (!water && arrayPosY < worldSize -1) water = !map.getFieldInArray(arrayPosX, arrayPosY+1).isLand();
+
+      if (water) {
+        regenerationrate = maxRegenerationrate;
+        influenceable = false;
+      } else {
+        regenerationrate = 0;
+        influenceable = true;
+      }
     }
   }
 
   // Wachstumsalgorithmus
   public void influenceNeighbours() {
-    if (arrayPosX > 0) {
-      Field f = map.getFieldInArray(arrayPosX-1, arrayPosY);
-      if (f.influenceable) {
-        f.influencingValues[0] = getGrown();
+    if (isLand()) {
+      if (arrayPosX > 0) {
+        Field f = map.getFieldInArray(arrayPosX-1, arrayPosY);
+        if (f.influenceable) {
+          f.influencingValues[0] = getGrown();
+        }
       }
-    }
-    if (arrayPosY > 0) {
-      Field f = map.getFieldInArray(arrayPosX, arrayPosY-1);
-      if (f.influenceable) {
-        f.influencingValues[1] = getGrown();
+      if (arrayPosY > 0) {
+        Field f = map.getFieldInArray(arrayPosX, arrayPosY-1);
+        if (f.influenceable) {
+          f.influencingValues[1] = getGrown();
+        }
       }
-    }
-    if (arrayPosX < worldSize -1) {
-      Field f = map.getFieldInArray(arrayPosX+1, arrayPosY);
-      if (f.influenceable) {
-        f.influencingValues[2] = getGrown();
+      if (arrayPosX < worldSize -1) {
+        Field f = map.getFieldInArray(arrayPosX+1, arrayPosY);
+        if (f.influenceable) {
+          f.influencingValues[2] = getGrown();
+        }
       }
-    }
-    if (arrayPosY < worldSize -1) {
-      Field f = map.getFieldInArray(arrayPosX, arrayPosY+1);
-      if (f.influenceable) {
-        f.influencingValues[3] = getGrown();
+      if (arrayPosY < worldSize -1) {
+        Field f = map.getFieldInArray(arrayPosX, arrayPosY+1);
+        if (f.influenceable) {
+          f.influencingValues[3] = getGrown();
+        }
       }
     }
   }
-
-  // save & load
-  
 }
