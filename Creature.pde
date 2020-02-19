@@ -20,9 +20,9 @@ public class Creature {
 
   //aussehen
   color furColour;
-  PGraphics complete;
-  
-  
+  PImage complete;
+
+
   //// wichtige Werte für die Kreatur
   float energy = 1000.0;
   float reproductionWaitingPeriod = 0.25;
@@ -72,15 +72,16 @@ public class Creature {
 
     id = ID;
     diameter = world.fW*world.diameterMultiplier;
-    
-    
+
+
     PImage bod = loadImage("Body.png");
     PImage head = loadImage("Head.png");
-    complete = createGraphics(74, 70, JAVA2D);
-    complete.beginDraw();
-    complete.image(bod, 0, 0);
-    complete.image(head, 49, 25);
-    complete.endDraw();
+    PGraphics comp = createGraphics(74, 70, JAVA2D);
+    comp.beginDraw();
+    comp.image(bod, 0, 0);
+    comp.image(head, 49, 25);
+    comp.endDraw();
+    complete = comp.get();
 
     generation = 1;
 
@@ -95,24 +96,25 @@ public class Creature {
 
     furColour = color((int)random(0, 256), (int)random(0, 256), (int)random(0, 256));
 
-    eatingRate += random(-World.stdEatingRate/100,World.stdEatingRate/100); // GEN
-    maxVelocity += random(-World.stdMaxVelocity/100,World.stdMaxVelocity/100); //GEN
-    attackValue += random(-World.stdAttackValue/100,World.stdAttackValue/100); // GEN
-    immuneValue += random(-World.stdImmuneValue/100,World.stdImmuneValue/100); // GEN
+    eatingRate += random(-World.stdEatingRate/100, World.stdEatingRate/100); // GEN
+    maxVelocity += random(-World.stdMaxVelocity/100, World.stdMaxVelocity/100); //GEN
+    attackValue += random(-World.stdAttackValue/100, World.stdAttackValue/100); // GEN
+    immuneValue += random(-World.stdImmuneValue/100, World.stdImmuneValue/100); // GEN
   }
 
   // 2. Konstruktor, damit die Farbe bei den Nachkommen berücksichtigt werden kann und die Gewichte übergeben werden können
   //                                  Elternweights                         Elternfellfarben       g: Generation, f1, f2: Fressrate, mG1, mG2: maxGeschwindigkeit, a1, a2: Angriffswert
   Creature(int x, int y, Matrix[] weights1, Matrix[] weights2, color furColour1, color furColour2, int g, float f1, float mG1, float a1, float f2, float mG2, float a2, int ID) {
 
-    PImage bod = loadImage("body.png");
-    PImage head = loadImage("head.png");
-    complete = createGraphics(74, 70, JAVA2D);
-    complete.beginDraw();
-    complete.image(bod, 0, 0);
-    complete.image(head, 49, 25);
-    complete.endDraw();
-    
+    PImage bod = loadImage("Body.png");
+    PImage head = loadImage("Head.png");
+    PGraphics comp = createGraphics(74, 70, JAVA2D);
+    comp.beginDraw();
+    comp.image(bod, 0, 0);
+    comp.image(head, 49, 25);
+    comp.endDraw();
+    complete = comp.get();
+
     id = ID;
     diameter = map.getFieldWidth()*map.diameterMultiplier;
 
@@ -148,43 +150,60 @@ public class Creature {
   public void drawCreature() {
     // Durchmesser an Energielevel angepasst
     diameter = map.stdDiameter * energy/2000 + 5 ;
-    color col = furColour;
+    for (int x = 0; x < 74; x++) {
+      for (int y = 0; y < 70; y++) {
+        if (complete.get(x, y) == color(66, 255, 0) || complete.get(x, y) == color(255,66,0)  || complete.get(x, y) == color(125) ) {
+          complete.set(x, y, furColour);
+        }
+      }
+    }
     // nach Angriff blinkt Kreatur 30 Frames rot
-    if (redtime != 0) {
-      redtime--;
-      if(red)col = color(255,0,0);
+    if (!sick) {
+      if (redtime != 0) {
+        redtime--;
+        if (red) {
+          for (int x = 0; x < 74; x++) {
+            for (int y = 0; y < 70; y++) {
+              if (complete.get(x, y) == furColour) {
+                complete.set(x, y, color(255,66,0));
+              }
+            }
+          }
+        }
+      }
+    } else {
+      for (int x = 0; x < 74; x++) {
+        for (int y = 0; y < 70; y++) {
+          if (complete.get(x, y) == furColour) {
+            complete.set(x, y, color(125));
+          }
+        }
+      }
     }
     if (redtime %4==0) {
       red = !red;
     }
     stroke(0);
     sensor.drawSensor();
-    if (sick)col = color(0);
-    complete.loadPixels();
-    complete.beginDraw();
-    for(int x = 0; x < 74;x++){
-      for(int y = 0; y < 70;y++){
-        if(complete.pixels[x+y*70] == color(26,0,0)){
-          complete.pixels[x+y*70] = col;
-        }
-      }
-    }
-    complete.endDraw();
-    PImage p = complete.get();
-    p.resize(floor(diameter)*5,floor(diameter/74*70)*5);
+
     // Körper
-    image(p,position.x,position.y);
+    pushMatrix();
+    translate(position.x, position.y);
+    rotate(velocity.heading());
+    translate(-position.x, -position.y);
+    image(complete, position.x - complete.width/2, position.y - complete.height/2);
+    popMatrix();
     //ellipse(position.x, position.y, diameter, diameter );
     // wenn in Top 10, dann werden Werte angezeigt
     /*if (inTop10) {
-      textSize(15*(diameter/(map.stdDiameter+5)));
-      textAlign(CENTER);
-      text("E: " + int(energy), position.x, position.y - 54);
-      text("FR: " + round(eatingRate*100)/100, position.x, position.y-43);
-      text("V: " + round(maxVelocity*100)/100, position.x, position.y-32);
-      text("RW: " + round(reproductionWaitingPeriod*100)/100, position.x, position.y-21);
-      text("A: " + round(attackValue*100)/100, position.x, position.y-10);
-    }*/
+     textSize(15*(diameter/(map.stdDiameter+5)));
+     textAlign(CENTER);
+     text("E: " + int(energy), position.x, position.y - 54);
+     text("FR: " + round(eatingRate*100)/100, position.x, position.y-43);
+     text("V: " + round(maxVelocity*100)/100, position.x, position.y-32);
+     text("RW: " + round(reproductionWaitingPeriod*100)/100, position.x, position.y-21);
+     text("A: " + round(attackValue*100)/100, position.x, position.y-10);
+     }*/
   }
 
   void updateFitness() {

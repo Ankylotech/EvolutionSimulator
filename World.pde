@@ -20,7 +20,7 @@ public class World {
   // Welt
   Field[][] world;
   //ArrayList<Field> land;
-  float fW = 8;
+  float fW = 80;
   float worldBounds;
 
   // Population
@@ -277,7 +277,7 @@ public class World {
         plot.removePoint(0);
       }
 
-      switch(selectedButton) {
+      /*switch(selectedButton) {
       case FITNESS:
         plot.addPoint((float)year, totalFitness/populationCount);
         break;
@@ -290,7 +290,7 @@ public class World {
       case GENERATION:
         plot.addPoint((float)year, maxGeneration);
         break;
-      }
+      }*/
 
       if (save) {
         outputOldestAge.print("(" + year + "," + oldestCAge + "," + oldestCID + ");");
