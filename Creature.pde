@@ -21,6 +21,8 @@ public class Creature {
   //aussehen
   color furColour;
   PImage complete;
+  PImage bod;
+  PImage head;
 
 
   //// wichtige Werte für die Kreatur
@@ -74,8 +76,8 @@ public class Creature {
     diameter = world.fW*world.diameterMultiplier;
 
 
-    PImage bod = loadImage("Body.png");
-    PImage head = loadImage("Head.png");
+    bod = loadImage("Body.png");
+    head = loadImage("Head.png");
     PGraphics comp = createGraphics(74, 70, JAVA2D);
     comp.beginDraw();
     comp.image(bod, 0, 0);
@@ -106,8 +108,8 @@ public class Creature {
   //                                  Elternweights                         Elternfellfarben       g: Generation, f1, f2: Fressrate, mG1, mG2: maxGeschwindigkeit, a1, a2: Angriffswert
   Creature(int x, int y, Matrix[] weights1, Matrix[] weights2, color furColour1, color furColour2, int g, float f1, float mG1, float a1, float f2, float mG2, float a2, int ID) {
 
-    PImage bod = loadImage("Body.png");
-    PImage head = loadImage("Head.png");
+    bod = loadImage("Body.png");
+    head = loadImage("Head.png");
     PGraphics comp = createGraphics(74, 70, JAVA2D);
     comp.beginDraw();
     comp.image(bod, 0, 0);
@@ -149,10 +151,10 @@ public class Creature {
   // Kreatur wird gemalt
   public void drawCreature() {
     // Durchmesser an Energielevel angepasst
-    diameter = map.stdDiameter * energy/2000 + 5 ;
+    diameter = map.stdDiameter * energy/500 + 5 ;
     for (int x = 0; x < 74; x++) {
       for (int y = 0; y < 70; y++) {
-        if (complete.get(x, y) == color(66, 255, 0) || complete.get(x, y) == color(255,66,0)  || complete.get(x, y) == color(125) ) {
+        if (complete.get(x, y) == color(66, 255, 0) || complete.get(x, y) == color(255, 66, 0)  || complete.get(x, y) == color(125) ) {
           complete.set(x, y, furColour);
         }
       }
@@ -165,7 +167,7 @@ public class Creature {
           for (int x = 0; x < 74; x++) {
             for (int y = 0; y < 70; y++) {
               if (complete.get(x, y) == furColour) {
-                complete.set(x, y, color(255,66,0));
+                complete.set(x, y, color(255, 66, 0));
               }
             }
           }
@@ -185,14 +187,17 @@ public class Creature {
     }
     stroke(0);
     sensor.drawSensor();
-
     // Körper
     pushMatrix();
     translate(position.x, position.y);
     rotate(velocity.heading());
     translate(-position.x, -position.y);
-    image(complete, position.x - complete.width/2, position.y - complete.height/2);
+    int newW = floor(complete.width*diameter/map.stdDiameter);
+    int newH = floor(complete.width*diameter/map.stdDiameter);
+    image(complete, position.x - newW/2, position.y - newH/2,newW,newH);
     popMatrix();
+
+    
     //ellipse(position.x, position.y, diameter, diameter );
     // wenn in Top 10, dann werden Werte angezeigt
     /*if (inTop10) {

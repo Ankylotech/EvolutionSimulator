@@ -50,7 +50,7 @@ class Interface extends PApplet {    //<>//
     bPopulation = new Button(100, plotHeight, 100, 50, "Population", ButtonType.POPULATION);
     bFlood = new Button(width-100, height-50, 100, 50, "FLUT", ButtonType.FLOOD);
     bGeneration = new Button(100, plotHeight+50, 100, 50, "Generation", ButtonType.GENERATION);
-    switchSlider = new Button(width-100, height-100, 100, 50, "Change Slider", ButtonType.SWITCHSLIDER);
+    switchSlider = new Button(width-100, height-100, 100, 50, "Slider Wechsel", ButtonType.SWITCHSLIDER);
 
     slider = new Slider(plotWidth+leftSpacing, plotHeight-150, 130, 65, 0, 2*map.minPopulationSize);
 

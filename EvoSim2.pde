@@ -25,7 +25,7 @@ boolean save = true;
 
 // fenstergroesse muss seperat geändert werden, sollte immer gleich sein & einen schönen Wert haben, z.B. 100, 500,...
 int worldSize;
-float scale = 1;
+float scale = 0.1;
 float xOffset = 0.0;
 float yOffset = 0.0;
 float xOffsetTotal = 0.0;
@@ -63,7 +63,8 @@ int repetitions = 1;
 //// Welt
 public World map;
 final public static float stdOceanLevel = 44;
-float oceanLevel = stdOceanLevel;
+float oceanLevel = 70;
+boolean sinks = true;
 
 void settings() {
   size(700, 700);
@@ -106,8 +107,14 @@ void setup() {
 
 // Mainloop
 void draw() {
+  
   for (int i=0; i<repetitions; i++) {
     map.update();
+  }
+  if(sinks){
+    if(oceanLevel > stdOceanLevel){
+      oceanLevel-= 0.1;
+    }
   }
 }
 

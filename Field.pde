@@ -13,7 +13,7 @@ class Field {
   float energyValue = 0;
   float maxEnergyValue;
   float regenerationrate;
-  float maxRegenerationrate = maxOverallEnergy/500;
+  float maxRegenerationrate = maxOverallEnergy/300;
   float[] influencingValues;
   boolean influenceable;
 
@@ -43,12 +43,12 @@ class Field {
         influencingValues = sort(influencingValues);
         for (int i = 3; i >= 0; i--) { 
           if (influencingValues[i] > random(0.5, 0.8)) {
-            regenerationrate += influencingValues[i] * rest;
+            regenerationrate += influencingValues[i] * rest * 0.9;
           }
           rest = maxRegenerationrate - regenerationrate;
         }
       }
-      regenerationrate *= sq(oceanLevel+10/noiseHeight);
+      regenerationrate *= sq(oceanLevel/noiseHeight);
       if (regenerationrate>maxRegenerationrate)regenerationrate = maxRegenerationrate;
 
       energyValue += regenerationrate;

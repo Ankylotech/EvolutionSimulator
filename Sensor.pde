@@ -1,7 +1,7 @@
 class Sensor {
 
   float distance;
-  float distanceMultiplier = 8;
+  float distanceMultiplier = 3.5;
 
   PVector position;
   PVector orientation;
