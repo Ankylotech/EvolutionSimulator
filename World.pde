@@ -7,7 +7,7 @@ public class World {
   float maxFloodDuration = 3;
 
   // Kreatur: Standard Werte
-  final public static float stdEatingRate = 25;
+  final public static float stdEatingRate = 10;
   final public static float stdMaxVelocity = 2;
   final public static float stdAttackValue = 60;
   final public static float stdImmuneValue = 100;

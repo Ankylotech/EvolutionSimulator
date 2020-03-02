@@ -73,9 +73,21 @@ public class Creature {
     diameter = world.fW*world.diameterMultiplier;
 
     PGraphics comp = createGraphics(74, 70, JAVA2D);
+    PImage headR = createImage(head.width,head.height,ARGB);
+    for(int i = 0; i < headR.width; i++){
+      for(int j = 0; j < headR.height;j++){
+        color c = head.get(i,j);
+        if(c == color(255,0,255)){
+          c = color(255*meatRate,255*(1-meatRate),0);
+          fill(c);
+        }
+        if(c != color(255)) headR.set(i,j,c);
+        else headR.set(i,j,color(0,0,0,0));
+      }
+    }
     comp.beginDraw();
     comp.image(bod, 0, 0);
-    comp.image(head, 49, 25);
+    comp.image(headR, 49, 24);
     comp.endDraw();
     complete = comp.get();
 
@@ -105,13 +117,13 @@ public class Creature {
 
     bod = loadImage("Body.png");
     head = loadImage("Head.png");
-    PImage headR = new PImage(head.width,head.height);
+    PImage headR = createImage(head.width,head.height,ARGB);
     for(int i = 0; i < headR.width; i++){
       for(int j = 0; j < headR.height;j++){
         color c = head.get(i,j);
-        if(c == color(255,0,222)){
-          println("JA");
+        if(c == color(255,0,255)){
           c = color(255*meatRate,255*(1-meatRate),0);
+          fill(c);
         }
         headR.set(i,j,c);
       }
@@ -119,7 +131,7 @@ public class Creature {
     PGraphics comp = createGraphics(74, 70, JAVA2D);
     comp.beginDraw();
     comp.image(bod, 0, 0);
-    comp.image(headR, 49, 25);
+    comp.image(headR, 49, 24);
     comp.endDraw();
     complete = comp.get();
 
