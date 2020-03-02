@@ -17,6 +17,7 @@ public class Creature {
   float maxVelocity = World.stdMaxVelocity; //GEN
   float attackValue = World.stdAttackValue; // GEN
   float immuneValue = World.stdImmuneValue; // GEN
+  float meatRate = World.stdMeatRate;
 
   //aussehen
   color furColour;
@@ -102,11 +103,12 @@ public class Creature {
     maxVelocity += random(-World.stdMaxVelocity/100, World.stdMaxVelocity/100); //GEN
     attackValue += random(-World.stdAttackValue/100, World.stdAttackValue/100); // GEN
     immuneValue += random(-World.stdImmuneValue/100, World.stdImmuneValue/100); // GEN
+    meatRate += random(-World.stdMeatRate/100, World.stdMeatRate/100);
   }
 
   // 2. Konstruktor, damit die Farbe bei den Nachkommen berücksichtigt werden kann und die Gewichte übergeben werden können
   //                                  Elternweights                         Elternfellfarben       g: Generation, f1, f2: Fressrate, mG1, mG2: maxGeschwindigkeit, a1, a2: Angriffswert
-  Creature(int x, int y, Matrix[] weights1, Matrix[] weights2, color furColour1, color furColour2, int g, float f1, float mG1, float a1, float f2, float mG2, float a2, int ID) {
+  Creature(int x, int y, Matrix[] weights1, Matrix[] weights2, color furColour1, color furColour2, int g, float f1, float mG1, float a1, float m1, float f2, float mG2, float a2,float m2, int ID) {
 
     bod = loadImage("Body.png");
     head = loadImage("Head.png");
@@ -124,6 +126,7 @@ public class Creature {
     eatingRate = mutate(mixGenes(f1, f2));
     maxVelocity = mutate(mixGenes(mG1, mG2));
     attackValue = mutate(mixGenes(a1, a2));
+    meatRate = mutate(mixGenes(m1,m2));
 
     generation = g+1;
 
@@ -301,7 +304,7 @@ public class Creature {
 
       if (!(victim == null)) {
         victim.addEnergy(-attackValue);
-        this.addEnergy((attackValue/World.stdAttackValue)*10);
+        this.addEnergy((attackValue/World.stdAttackValue)*100 * meatRate);
         if (energy>maxEnergy) { // Kreatur-Energie ist über dem Maximum
           energy = maxEnergy;
         }
@@ -525,6 +528,9 @@ public class Creature {
   }
   public float getAttackValue() {
     return attackValue;
+  }
+  public float getMeatRate(){
+    return meatRate;
   }
   public float getReproductionWaitingPeriod() {
     return reproductionWaitingPeriod;

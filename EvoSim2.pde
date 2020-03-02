@@ -57,7 +57,7 @@ boolean locked = false;
 // friert die Simulation ein
 boolean freeze = false;
 // fast forward
-int repetitions = 1;
+int repetitions = 5;
 
 
 //// Welt
@@ -107,15 +107,21 @@ void setup() {
 
 // Mainloop
 void draw() {
-  
+
   for (int i=0; i<repetitions; i++) {
     map.update();
-  }
-  if(sinks){
-    if(oceanLevel > stdOceanLevel){
+    if (sinks) {
+    for (int j = 0; j < map.world.length; j++) {
+      for (Field f : map.world[j]) {
+        f.influenceByWater();
+      }
+    }
+    if (oceanLevel > stdOceanLevel) {
       oceanLevel-= 0.1;
     }
   }
+  }
+  
 }
 
 // Eventhandler

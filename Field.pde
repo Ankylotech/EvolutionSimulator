@@ -13,7 +13,7 @@ class Field {
   float energyValue = 0;
   float maxEnergyValue;
   float regenerationrate;
-  float maxRegenerationrate = maxOverallEnergy/300;
+  float maxRegenerationrate = maxOverallEnergy/500;
   float[] influencingValues;
   boolean influenceable;
 

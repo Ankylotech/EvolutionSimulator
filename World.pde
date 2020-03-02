@@ -11,6 +11,7 @@ public class World {
   final public static float stdMaxVelocity = 2;
   final public static float stdAttackValue = 60;
   final public static float stdImmuneValue = 100;
+  final public static float stdMeatRate = 0.1;
   float diameterMultiplier = 0.25;
 
   // Welt: Standard Werte
@@ -157,10 +158,12 @@ public class World {
         c1.getEatingRate(), 
         c1.getMaxVelocity(), 
         c1.getAttackValue(), 
+        c1.getMeatRate(),
 
         c2.getEatingRate(), 
         c2.getMaxVelocity(), 
         c2.getAttackValue(), 
+        c2.getMeatRate(),
 
         currentID
 
@@ -181,11 +184,6 @@ public class World {
     }
     if (floodOngoing) {
       floodDuration -= (float)timePerFrame;
-      for (int i = 0; i < world.length; i++) {
-        for (Field f : world[i]) {
-          f.influenceByWater();
-        }
-      }
       if (floodDuration <= 0) {
         floodOngoing = false;
         oceanLevel = stdOceanLevel;
