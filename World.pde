@@ -195,7 +195,7 @@ public class World {
     }
     translate(xOffsetTotal+xOffset, yOffsetTotal+yOffset);
     scale(scale);
-    background(0, 128, 255);
+    background(255);
 
     totalAge = 0;
     totalFitness = 0;
@@ -275,7 +275,7 @@ public class World {
         plot.removePoint(0);
       }
 
-      /*switch(selectedButton) {
+      switch(selectedButton) {
       case FITNESS:
         plot.addPoint((float)year, totalFitness/populationCount);
         break;
@@ -288,7 +288,7 @@ public class World {
       case GENERATION:
         plot.addPoint((float)year, maxGeneration);
         break;
-      }*/
+      }
 
       if (save) {
         outputOldestAge.print("(" + year + "," + oldestCAge + "," + oldestCID + ");");

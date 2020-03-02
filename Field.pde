@@ -42,7 +42,7 @@ class Field {
         float rest = maxRegenerationrate;
         influencingValues = sort(influencingValues);
         for (int i = 3; i >= 0; i--) { 
-          if (influencingValues[i] > random(0.5, 0.8)) {
+          if (influencingValues[i] > random(0.5, 0.9)) {
             regenerationrate += influencingValues[i] * rest * 0.9;
           }
           rest = maxRegenerationrate - regenerationrate;

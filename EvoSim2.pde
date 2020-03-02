@@ -7,6 +7,8 @@ enum ButtonType {
   FITNESS, AVGAGE, POPULATION, FLOOD, GENERATION, SWITCHSLIDER
 };
 
+
+
 //// Outputs zum speichern der Daten
 
 PrintWriter outputOldestAge;
@@ -18,7 +20,7 @@ PrintWriter outputPopulationSize;
 // wird unten aus saveDataIndex.dat ausgelesen
 int fileNumber;
 // bestimmt, ob die Daten gespeichert werden
-boolean save = true;
+boolean save = false;
 
 //// Weltvariablen
 // speichert die momentane Skalierung, offset, etc.
@@ -33,7 +35,8 @@ float yOffsetTotal = 0.0;
 float xPressed, yPressed;
 
 //// Interface
-
+PImage bod;
+PImage head;
 // neues Fenster
 PApplet iface;
 // Plot und zugehörige Daten
@@ -56,8 +59,6 @@ boolean godmode = false;
 boolean locked = false;
 // friert die Simulation ein
 boolean freeze = false;
-// fast forward
-int repetitions = 5;
 
 
 //// Welt
@@ -68,6 +69,9 @@ boolean sinks = true;
 
 void settings() {
   size(700, 700);
+
+    bod = loadImage("Body.png");
+    head = loadImage("Head.png");
   //fullScreen();
 }
 
@@ -108,9 +112,8 @@ void setup() {
 // Mainloop
 void draw() {
 
-  for (int i=0; i<repetitions; i++) {
-    map.update();
-    if (sinks) {
+  map.update();
+  if (sinks) {
     for (int j = 0; j < map.world.length; j++) {
       for (Field f : map.world[j]) {
         f.influenceByWater();
@@ -120,8 +123,6 @@ void draw() {
       oceanLevel-= 0.1;
     }
   }
-  }
-  
 }
 
 // Eventhandler
@@ -130,21 +131,25 @@ void mouseWheel(MouseEvent event) {
 
   // Grenzwerte der Scale werden überprüft
   scale -= (e / 10)*scale;
-  if (scale < 0.01) {
-    scale = 0.01;
+  if (scale < 0.07) {
+    scale = 0.07;
   }
   if (scale > 10) {
     scale = 10;
   }
 
   // zoom auf Mauszeiger
-  if (!(scale <= 0.01 || scale >= 10)) {
+  if (!(scale <= 0.07 || scale >= 10)) {
     float rMouseX = (mouseX-(xOffsetTotal))/scale;
     float rMouseY = (mouseY-(yOffsetTotal))/scale;
 
     xOffsetTotal += rMouseX * (e / 10)*scale;
     yOffsetTotal += rMouseY * (e / 10)*scale;
   }
+  if (xOffsetTotal > 0) xOffsetTotal = 0;
+  if (yOffsetTotal > 0) yOffsetTotal = 0;
+  if ( xOffsetTotal + map.worldBounds*scale < width) xOffsetTotal = width-map.worldBounds*scale;
+  if ( yOffsetTotal + map.worldBounds*scale < height) yOffsetTotal = height-map.worldBounds*scale;
 }
 void mouseDragged() {
   // offset pro Frame wird berechnet und zu Gesamtoffset addiert, wenn Maus gedrückt ist
@@ -156,6 +161,10 @@ void mouseDragged() {
     xPressed = mouseX;
     yPressed = mouseY;
     cursor(MOVE);
+    if (xOffsetTotal > 0) xOffsetTotal = 0;
+    if (yOffsetTotal > 0) yOffsetTotal = 0;
+    if ( xOffsetTotal + map.worldBounds*scale < width) xOffsetTotal = width-map.worldBounds*scale;
+    if ( yOffsetTotal + map.worldBounds*scale < height) yOffsetTotal = height-map.worldBounds*scale;
   }
 }
 void keyPressed() {
@@ -179,11 +188,6 @@ void keyPressed() {
     if (c != null) {
       map.population.removeCreature(c);
     }
-  }
-  if (key == 'w') repetitions++;
-  if (key == 's') {
-    repetitions--;
-    if (repetitions<0) repetitions = 0;
   }
 }
 

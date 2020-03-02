@@ -22,8 +22,6 @@ public class Creature {
   //aussehen
   color furColour;
   PImage complete;
-  PImage bod;
-  PImage head;
 
 
   //// wichtige Werte für die Kreatur
@@ -68,17 +66,12 @@ public class Creature {
   //// Fühler
   Sensor sensor;
 
-
-
   // sollte bei 1. Generation verwendet werden
   Creature(int x, int y, World world, int ID) {
 
     id = ID;
     diameter = world.fW*world.diameterMultiplier;
 
-
-    bod = loadImage("Body.png");
-    head = loadImage("Head.png");
     PGraphics comp = createGraphics(74, 70, JAVA2D);
     comp.beginDraw();
     comp.image(bod, 0, 0);
@@ -112,10 +105,21 @@ public class Creature {
 
     bod = loadImage("Body.png");
     head = loadImage("Head.png");
+    PImage headR = new PImage(head.width,head.height);
+    for(int i = 0; i < headR.width; i++){
+      for(int j = 0; j < headR.height;j++){
+        color c = head.get(i,j);
+        if(c == color(255,0,222)){
+          println("JA");
+          c = color(255*meatRate,255*(1-meatRate),0);
+        }
+        headR.set(i,j,c);
+      }
+    }
     PGraphics comp = createGraphics(74, 70, JAVA2D);
     comp.beginDraw();
     comp.image(bod, 0, 0);
-    comp.image(head, 49, 25);
+    comp.image(headR, 49, 25);
     comp.endDraw();
     complete = comp.get();
 
